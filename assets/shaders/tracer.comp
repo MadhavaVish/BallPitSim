@@ -1,0 +1,132 @@
+#version 460
+
+//#include "Trig.glsl"
+
+
+//#include "Fresnel.glsl"
+//#include "GGX.glsl"
+#include "Structs.glsl"
+
+
+#include "Scatter.glsl"
+#include "Frame.glsl"
+
+layout (local_size_x = 16, local_size_y = 16) in;
+layout (binding = 0, rgba16f) uniform writeonly image2D resultImage;
+layout (binding = 1, rgba32f) uniform image2D accumulationImage;
+layout (binding = 2) readonly uniform UniformBufferObjectStruct { RayGenUBO Camera; };
+
+layout (std430, binding = 3) readonly buffer VertexBuffer { Vertex vertices[]; };
+layout (std430, binding = 4) readonly buffer IndexBuffer { uint indices[]; };
+layout (std430, binding = 5) readonly buffer TriBuffer { Tri triangles[]; };
+layout (std430, binding = 6) readonly buffer BVHNodeBuffer { BVHNode bvhNodes[]; };
+layout (std430, binding = 7) readonly buffer NormalBuffer { Normal normals[]; };
+layout (std430, binding = 8) readonly buffer MaterialBuffer { Material materials[]; };
+
+#include "SceneTraversal.glsl"
+
+struct SurfaceInteraction
+{
+	vec3 normal;
+	vec2 uv;
+	Material mat;
+};
+
+void getSurfaceProperties(inout SurfaceInteraction interaction, inout Intersection isect)
+{
+	Tri tri = triangles[isect.objIdx];
+	interaction.mat = materials[tri.materialIdx];
+	Vertex v0 = vertices[tri.modelOffset + indices[tri.v_indices]];
+	Vertex v1 = vertices[tri.modelOffset + indices[tri.v_indices + 1]];
+	Vertex v2 = vertices[tri.modelOffset + indices[tri.v_indices + 2]];
+	Normal n0 = normals[tri.modelOffset + indices[tri.v_indices]];
+	Normal n1 = normals[tri.modelOffset + indices[tri.v_indices + 1]];
+	Normal n2 = normals[tri.modelOffset + indices[tri.v_indices + 2]];
+
+	interaction.normal = (1 - isect.barycentric.x - isect.barycentric.y) * n0.normal + isect.barycentric.x* n1.normal + isect.barycentric.y * n2.normal;
+	
+	vec2 uv0 = vec2(v0.u, n0.v);
+	vec2 uv1 = vec2(v1.u, n1.v);
+	vec2 uv2 = vec2(v2.u, n2.v);
+
+	interaction.uv = (1 - isect.barycentric.x - isect.barycentric.y) * uv0 + isect.barycentric.x* uv1 + isect.barycentric.y * uv2;
+}
+
+void main()
+{
+	vec2 dim = imageSize(resultImage);
+	if(gl_GlobalInvocationID.x > dim.x || gl_GlobalInvocationID.y > dim.y) return;
+	if(Camera.frameIndex == 1)
+	{
+		imageStore(accumulationImage, ivec2(gl_GlobalInvocationID.xy),vec4(0.0));
+	}
+	uint pixelSeed = WangHash(Camera.frameIndex);
+	uint seed = randSeed(ivec2(gl_GlobalInvocationID.xy), Camera.frameIndex);
+	vec2 pixelOffset = vec2(RandomFloat(pixelSeed), RandomFloat(pixelSeed));
+
+	Ray ray;
+	getPrimaryRay(gl_GlobalInvocationID.x, gl_GlobalInvocationID.y, pixelOffset, Camera, ray);
+	vec3 throughput = vec3(1.0);
+	uint maxBounces = 30;
+
+	for(uint i = 0; i < maxBounces; i++)
+	{
+		Intersection isect;
+		isect.t_hit = 1e30f;
+
+		if(IntersectBVH(ray, isect))
+		{
+			SurfaceInteraction inter;
+			getSurfaceProperties(inter, isect);
+			Frame surf = setFromUp(inter.normal);
+
+			vec3 hitColor = inter.mat.albedo;
+
+			float rrProb = 1.0;
+			if(i > 3)
+			{
+				rrProb = clamp(max(max(throughput.x, throughput.y), throughput.z), 0.05, 0.95);
+				float rr = RandomFloat(seed);
+				if(rr > rrProb)
+				{
+					throughput *= vec3(0.0);
+					break;
+				}
+			}
+			if(inter.mat.emission > 0.0)	
+			{
+				throughput *= hitColor * inter.mat.emission;
+				break;
+			}
+			Mat mat;
+			mat.baseColor_ = hitColor;
+			mat.roughness_ = 0.2;
+			mat.metalness_ = 0.0;
+			mat.transmission_ = 1.0;
+			mat.ior_ = 1.5f;
+			mat.emittance_ = vec3(0.0);
+			mat.alpha_ = max(0.001f, mat.roughness_ * mat.roughness_);
+
+			float pdf;
+			vec3 wi = sampleDirection(seed, mat, ToLocal(surf, -ray.direction), pdf);
+			float cosThetaI = abs(cosTheta(wi));
+			if (cosThetaI <= 0.0f || pdf <= 0.0f) {
+				break;
+			}
+			vec3 bsdf = evaluate(mat, wi, ToLocal(surf, -ray.direction));
+			throughput *= (bsdf * cosThetaI)/(rrProb*pdf);
+			ray = getRay(rayPnt(ray, isect.t_hit) + sign(cosTheta(wi)) * inter.normal * 0.001f , ToWorld(surf,wi));
+		}
+		else
+		{
+			throughput *= vec3(0.8);
+			break;
+		}
+	
+	}
+//	vec4 co = texture(accumulationImage, vec2(0.5, 0.5);
+	vec4 accumulated = imageLoad(accumulationImage, ivec2(gl_GlobalInvocationID.xy));
+	accumulated += min(vec4(throughput,1.0), 50.0);
+	imageStore(accumulationImage, ivec2(gl_GlobalInvocationID.xy),accumulated);
+	imageStore(resultImage, ivec2(gl_GlobalInvocationID.xy),accumulated/Camera.frameIndex);
+}
