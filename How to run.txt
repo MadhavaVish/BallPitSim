@@ -1,1 +1,0 @@
-Run setup.bat in the scripts folder and that should generate the visual studio files :)
