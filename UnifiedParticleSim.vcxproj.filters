@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="assets">
+      <UniqueIdentifier>{583885F2-44DA-AFC8-2D95-C31C19D63619}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="assets\shaders">
+      <UniqueIdentifier>{51CD2FD9-3D9B-23DF-262F-9405129CFF43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{2DAB880B-99B4-887C-2230-9F7C8E38947C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Gwaphics">
+      <UniqueIdentifier>{D2852BE5-BEE8-BA89-676E-F33F53B0860C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Gwaphics\ImGui">
+      <UniqueIdentifier>{7C904973-6874-0AC9-D1D4-041CBDD7F44A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Gwaphics\ImGui\backends">
+      <UniqueIdentifier>{2656BF09-9263-EDEF-1B4A-E9DA8756B9A6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Gwaphics\PhysicsScene">
+      <UniqueIdentifier>{52DDD6B2-BE9F-0A3D-0750-99C97351E31A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Gwaphics\Pipelines">
+      <UniqueIdentifier>{8A21E8D3-761B-1126-5F88-A7364B217792}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Gwaphics\Utilities">
+      <UniqueIdentifier>{BD987636-A992-9F88-92FF-35997E9805F5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Gwaphics\Vulkan">
+      <UniqueIdentifier>{129373FB-7EF4-5009-0762-97BB73C287C8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\Gwaphics\Application.hpp">
+      <Filter>src\Gwaphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\ImGui\backends\imgui_impl_glfw.h">
+      <Filter>src\Gwaphics\ImGui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\ImGui\backends\imgui_impl_vulkan.h">
+      <Filter>src\Gwaphics\ImGui\backends</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\ImGui\imconfig.h">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\ImGui\imgui.h">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\ImGui\imgui_internal.h">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\ImGui\imstb_rectpack.h">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\ImGui\imstb_textedit.h">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\ImGui\imstb_truetype.h">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\PhysicsScene\Scene.hpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Pipelines\SimpleQuadPipeline.hpp">
+      <Filter>src\Gwaphics\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Pipelines\UniformBuffer.hpp">
+      <Filter>src\Gwaphics\Pipelines</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Utilities\Console.hpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Utilities\Glm.hpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Utilities\Model.hpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Utilities\ModelViewController.hpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Utilities\StbImage.hpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Utilities\UserInterface.hpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Buffer.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\BufferUtil.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\CommandBuffers.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\CommandPool.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\DebugUtils.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\DebugUtilsMessenger.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\DepthBuffer.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\DescriptorBinding.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\DescriptorPool.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\DescriptorSetLayout.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\DescriptorSetManager.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\DescriptorSets.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Device.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\DeviceMemory.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Enumerate.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Fence.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\FrameBuffer.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Image.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\ImageMemoryBarrier.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\ImageView.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Instance.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\PipelineLayout.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\RenderPass.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Sampler.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Semaphore.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\ShaderModule.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\SingleTimeCommands.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Strings.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Surface.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\SwapChain.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Version.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Vulkan.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\Window.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\Vulkan\WindowConfig.hpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="src\UserSettings.hpp">
+      <Filter>src</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Gwaphics\Application.cpp">
+      <Filter>src\Gwaphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\ImGui\backends\imgui_impl_glfw.cpp">
+      <Filter>src\Gwaphics\ImGui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\ImGui\backends\imgui_impl_vulkan.cpp">
+      <Filter>src\Gwaphics\ImGui\backends</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\ImGui\imgui.cpp">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\ImGui\imgui_demo.cpp">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\ImGui\imgui_draw.cpp">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\ImGui\imgui_tables.cpp">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\ImGui\imgui_widgets.cpp">
+      <Filter>src\Gwaphics\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\PhysicsScene\Scene.cpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Pipelines\SimpleQuadPipeline.cpp">
+      <Filter>src\Gwaphics\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Pipelines\UniformBuffer.cpp">
+      <Filter>src\Gwaphics\Pipelines</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Utilities\Console.cpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Utilities\Model.cpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Utilities\ModelViewController.cpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Utilities\StbImage.cpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Utilities\UserInterface.cpp">
+      <Filter>src\Gwaphics\Utilities</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Buffer.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\CommandBuffers.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\CommandPool.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\DebugUtils.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\DebugUtilsMessenger.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\DepthBuffer.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\DescriptorPool.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\DescriptorSetLayout.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\DescriptorSetManager.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\DescriptorSets.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Device.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\DeviceMemory.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Fence.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\FrameBuffer.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Image.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\ImageView.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Instance.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\PipelineLayout.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\RenderPass.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Sampler.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Semaphore.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\ShaderModule.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Strings.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Surface.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\SwapChain.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Vulkan.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\Vulkan\Window.cpp">
+      <Filter>src\Gwaphics\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\shaders\quad.frag.spv">
+      <Filter>assets\shaders</Filter>
+    </None>
+    <None Include="assets\shaders\quad.vert.spv">
+      <Filter>assets\shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="assets\shaders\quad.frag">
+      <Filter>assets\shaders</Filter>
+    </CustomBuild>
+    <CustomBuild Include="assets\shaders\quad.vert">
+      <Filter>assets\shaders</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>

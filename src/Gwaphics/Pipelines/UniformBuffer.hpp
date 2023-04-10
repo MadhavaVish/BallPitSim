@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <glm/glm.hpp>
 
 namespace Vulkan
 {
@@ -14,11 +15,9 @@ namespace Vulkan
 	class UniformBufferObject
 	{
 	public:
-		uint32_t windowWidth;
-		uint32_t windowHeight;
-		uint32_t width;
-		uint32_t height;
-		float vignette;
+		glm::mat4 ModelView;
+		glm::mat4 Projection;
+		float Particlescale;
 	};
 
 	class UniformBuffer

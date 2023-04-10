@@ -15,11 +15,7 @@ namespace Vulkan
 struct UserSettings final
 {
 	// Scene
-	int* ImageWidth;
-	int* ImageHeight;
-	float* Vignette;
-	// Renderer
-	bool AccumulateRays;
+	float* particleScale;
 
 	// Camera
 

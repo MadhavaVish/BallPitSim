@@ -3,8 +3,9 @@
 #include "Vulkan/FrameBuffer.hpp"
 #include "Vulkan/WindowConfig.hpp"
 #include "Pipelines/UniformBuffer.hpp"
-
-#include "UserInterface.hpp"
+#include "Utilities/ModelViewController.hpp"
+#include "PhysicsScene/Scene.hpp"
+#include "Utilities/UserInterface.hpp"
 #include <vector>
 #include <memory>
 #include <chrono>
@@ -61,20 +62,14 @@ namespace Vulkan
 		void CreateViewport();
 		void DeleteViewPort();
 		void DrawFrame();
-		void ComputePathTrace(VkCommandBuffer commandBuffer);
 		void Render(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
-		void OnKey(int key, int scancode, int action, int mods) { }
-		void OnCursorPosition(double xpos, double ypos) { }
-		void OnMouseButton(int button, int action, int mods) { }
-		void OnScroll(double xoffset, double yoffset) { }
+		void OnKey(int key, int scancode, int action, int mods);
+		void OnCursorPosition(double xpos, double ypos);
+		void OnMouseButton(int button, int action, int mods);
+		void OnScroll(double xoffset, double yoffset);
 
 	private:
-		void buildComputeCommmandBuffer();
-
-		void createComputeTargetImage();
-		void deleteComputeTargetImage();
-		void recordComputeCommands();
 		void UpdateUniformBuffer(uint32_t imageIndex);
 		void RecreateSwapChain();
 
@@ -114,24 +109,16 @@ namespace Vulkan
 
 		std::vector<Vulkan::UniformBuffer> quadUniformBuffers_;
 		std::unique_ptr<class SimpleQuadPipeline> quadPipeline_;
-
+		double time_{};
 		int imgWidth = 1280, imgHeight = 720;
 		int prevImgWidth = 1280, prevImgHeight = 720;
 		float vignette = 0.01f;
-		std::unique_ptr<class Image> computeImage_;
-		std::unique_ptr<class DeviceMemory> computeImageMemory_;
-		std::unique_ptr<class ImageView> computeImageView_;
-		std::unique_ptr<class Sampler> computeSampler_;
-		VkDescriptorImageInfo computeImageDescriptorInfo_;
-
-		std::unique_ptr<class ComputeTracer> computeTracer_;
-		std::unique_ptr<class CommandPool> computeCommandPool_;
-		std::unique_ptr<class CommandBuffers> computeCommandBuffers_;
-		std::unique_ptr<class Fence> computeFence_;
-
+		ModelViewController modelViewController_{};
+		std::unique_ptr<Scene> scene_;
+		float particleScale = 0.02f;
 		Statistics frameStats;
 		UserSettings settings;
-		std::chrono::steady_clock::time_point prevTime;
+		double frameTime;
 		size_t currentFrame_{};
 	};
 

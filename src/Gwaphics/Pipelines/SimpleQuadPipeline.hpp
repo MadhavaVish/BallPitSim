@@ -36,20 +36,8 @@ namespace Vulkan
 	class SimpleQuadPipeline
 	{
 	public:
-		SimpleQuadPipeline(const Vulkan::SwapChain& swapChain, const Vulkan::RenderPass& renderPass, const std::vector<Vulkan::UniformBuffer>& uniformBuffers, VkDescriptorImageInfo& imageDescriptor);
+		SimpleQuadPipeline(const Vulkan::SwapChain& swapChain, const Vulkan::RenderPass& renderPass, const std::vector<Vulkan::UniformBuffer>& uniformBuffers, const Vulkan::Buffer& positionBuffer);
 		~SimpleQuadPipeline();
-
-		void updateQuadTextureDescriptor(const std::vector<Vulkan::UniformBuffer>& uniformBuffers, VkDescriptorImageInfo& imageDescriptor);
-
-		void bindPipeline(VkCommandBuffer& commandBuffer)
-		{
-			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
-		}
-
-		void renderQuad(VkCommandBuffer& commandBuffer)
-		{
-			vkCmdDraw(commandBuffer, 6, 1, 0, 0);
-		}
 
 		VkDescriptorSet DescriptorSet(uint32_t index) const;
 		//VkDescriptorSet QuadTextureDescriptorSet() const;
@@ -59,7 +47,7 @@ namespace Vulkan
 		const SwapChain& swapChain_;
 
 		VULKAN_HANDLE(VkPipeline, pipeline_)
-
+		
 		std::unique_ptr<DescriptorSetManager> descriptorSetManager_;
 		//std::unique_ptr<DescriptorSetManager> imageDescriptorSetManager_;
 		std::unique_ptr<Vulkan::PipelineLayout> pipelineLayout_;
