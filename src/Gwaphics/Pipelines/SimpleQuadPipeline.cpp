@@ -3,8 +3,7 @@
 #include "../Vulkan/Buffer.hpp"
 #include "../Vulkan/DescriptorSets.hpp"
 #include "../Vulkan/ShaderModule.hpp"
-
-
+#include "../Utilities/Model.hpp"
 namespace Vulkan
 {
     static void defaultPipelineConfigInfo(PipelineConfigInfo& configInfo)
@@ -82,14 +81,14 @@ namespace Vulkan
         configInfo.attributeDescriptions = {};
     }
 
-	SimpleQuadPipeline::SimpleQuadPipeline(const Vulkan::SwapChain& swapChain, const Vulkan::RenderPass& renderPass, const std::vector<Vulkan::UniformBuffer>& uniformBuffers, VkDescriptorImageInfo& imageDescriptor)
+	SimpleQuadPipeline::SimpleQuadPipeline(const Vulkan::SwapChain& swapChain, const Vulkan::RenderPass& renderPass, const std::vector<Vulkan::UniformBuffer>& uniformBuffers, const Vulkan::Buffer& positionBuffer)
 	: swapChain_(swapChain)
 	{
 		const auto& device = swapChain.Device();
 		const std::vector<DescriptorBinding> descriptorBindings =
 		{ 
-            {0, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT},
-			{3, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT},
+			{0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
+            {1, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
 		};
 
 		descriptorSetManager_.reset(new DescriptorSetManager(device, descriptorBindings, uniformBuffers.size()));
@@ -101,28 +100,18 @@ namespace Vulkan
 			VkDescriptorBufferInfo uniformBufferInfo = {};
 			uniformBufferInfo.buffer = uniformBuffers[i].Buffer().Handle();
 			uniformBufferInfo.range = VK_WHOLE_SIZE;
-            
+            VkDescriptorBufferInfo positionBufferInfo = {};
+            positionBufferInfo.buffer = positionBuffer.Handle();
+            positionBufferInfo.range = VK_WHOLE_SIZE;
 
-            descriptorWrites.push_back(descriptorSets.Bind(i, 3, uniformBufferInfo));
-            descriptorWrites.push_back(descriptorSets.Bind(i, 0, imageDescriptor));
+            descriptorWrites.push_back(descriptorSets.Bind(i, 0, uniformBufferInfo));
+            descriptorWrites.push_back(descriptorSets.Bind(i, 1, positionBufferInfo));
 		    descriptorSets.UpdateDescriptors(i, descriptorWrites); 
 
 		}
 
-
-        //const std::vector<DescriptorBinding> imageDescriptorBindings =
-        //{
-        //    {0, 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT},
-        //};
-        //imageDescriptorSetManager_.reset(new DescriptorSetManager(device, imageDescriptorBindings, 1));
-        //std::vector<VkWriteDescriptorSet> imageDescriptorWrites;
-        //auto& imageDescriptorSets = imageDescriptorSetManager_->DescriptorSets();
-        //imageDescriptorWrites.push_back(imageDescriptorSets.Bind(0, 0, imageDescriptor));
-        //imageDescriptorSets.UpdateDescriptors(0, imageDescriptorWrites);
-
         std::vector<VkDescriptorSetLayout> pipelineLayouts;
         pipelineLayouts.push_back(descriptorSetManager_->DescriptorSetLayout().Handle());
-        //pipelineLayouts.push_back(imageDescriptorSetManager_->DescriptorSetLayout().Handle());
 
 		pipelineLayout_.reset(new class PipelineLayout(device, pipelineLayouts));
 
@@ -141,15 +130,15 @@ namespace Vulkan
         config.renderPass = renderPass.Handle();
         config.pipelineLayout = pipelineLayout_->Handle();
 
-        auto& bindingDescriptions = config.bindingDescriptions;
-        auto& attributeDescriptions = config.attributeDescriptions;
+        const auto bindingDescription = Vertex::GetBindingDescription();
+        const auto attributeDescriptions = Vertex::GetAttributeDescriptions();
+
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexAttributeDescriptionCount =
-            static_cast<uint32_t>(attributeDescriptions.size());
-        vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescriptions.size());
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
         vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
-        vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
 
         VkGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -191,24 +180,6 @@ namespace Vulkan
         pipelineLayout_.reset();
         descriptorSetManager_.reset();
 	}
-
-    void SimpleQuadPipeline::updateQuadTextureDescriptor(const std::vector<Vulkan::UniformBuffer>& uniformBuffers, VkDescriptorImageInfo& imageDescriptor)
-    {
-        auto& descriptorSets = descriptorSetManager_->DescriptorSets();
-        std::vector<VkWriteDescriptorSet> descriptorWrites;
-        for (uint32_t i = 0; i != uniformBuffers.size(); ++i)
-        {
-            VkDescriptorBufferInfo uniformBufferInfo = {};
-            uniformBufferInfo.buffer = uniformBuffers[i].Buffer().Handle();
-            uniformBufferInfo.range = VK_WHOLE_SIZE;
-
-
-            descriptorWrites.push_back(descriptorSets.Bind(i, 3, uniformBufferInfo));
-            descriptorWrites.push_back(descriptorSets.Bind(i, 0, imageDescriptor));
-            descriptorSets.UpdateDescriptors(i, descriptorWrites);
-
-        }
-    }
 
     VkDescriptorSet SimpleQuadPipeline::DescriptorSet(const uint32_t index) const
     {

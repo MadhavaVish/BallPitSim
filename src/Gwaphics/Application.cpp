@@ -19,13 +19,12 @@
 #include "Vulkan/Sampler.hpp"
 #include "Vulkan/ImageMemoryBarrier.hpp"
 #include "Gwaphics/Pipelines/SimpleQuadPipeline.hpp"
-#include "Gwaphics/Pipelines/ComputeTracer.hpp"
 #include "ImGui/backends/imgui_impl_vulkan.h"
 
 #include <stdexcept>
 #include <array>
 #include <iostream>
-
+#include <glm/gtx/string_cast.hpp>
 namespace Vulkan {
 
 Application::Application(const WindowConfig& windowConfig, const VkPresentModeKHR presentMode, const bool enableValidationLayers) :
@@ -39,21 +38,15 @@ Application::Application(const WindowConfig& windowConfig, const VkPresentModeKH
 	instance_.reset(new Instance(*window_, validationLayers, VK_API_VERSION_1_2));
 	debugUtilsMessenger_.reset(enableValidationLayers ? new DebugUtilsMessenger(*instance_, VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) : nullptr);
 	surface_.reset(new Surface(*instance_));
-	settings.ImageWidth = &imgWidth;
-	settings.ImageHeight = &imgHeight;
-	settings.Vignette = &vignette;
+	settings.particleScale = &particleScale;
+	modelViewController_.Reset(glm::translate(glm::mat4(1), glm::vec3(0, 0, -2)));
 }
 
 Application::~Application()
 {
 	Application::DeleteSwapChain();
-
-	computeTracer_.reset();
-	deleteComputeTargetImage();
+	scene_.reset();
 	commandPool_.reset();
-	computeFence_.reset();
-	computeCommandBuffers_.reset();
-	computeCommandPool_.reset();
 	device_.reset();
 	surface_.reset();
 	debugUtilsMessenger_.reset();
@@ -124,40 +117,7 @@ void Application::SetPhysicalDevice(
 {
 	device_.reset(new class Device(physicalDevice, *surface_, requiredExtensions, deviceFeatures, nextDeviceFeatures));
 	commandPool_.reset(new class CommandPool(*device_, device_->GraphicsFamilyIndex(), true));
-	computeCommandPool_.reset(new class CommandPool(*device_, device_->ComputeFamilyIndex(), true));
-	computeCommandBuffers_.reset(new CommandBuffers(*computeCommandPool_, 1));
-	computeFence_.reset(new Fence(*device_, true));
-	createComputeTargetImage();
-
-	computeTracer_.reset(new ComputeTracer(*device_, *computeCommandPool_, computeImageDescriptorInfo_, imgWidth, imgHeight));
-
-}
-
-void Application::buildComputeCommmandBuffer()
-{
-
-}
-
-void Application::createComputeTargetImage()
-{
-	computeImage_ = std::make_unique<Image>(*device_, VkExtent2D(imgWidth, imgHeight), VK_FORMAT_R16G16B16A16_SFLOAT, VK_IMAGE_TILING_OPTIMAL,VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT);
-	computeImageMemory_ = std::make_unique<DeviceMemory>(computeImage_->AllocateMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT));
-	computeImage_->TransitionImageLayout(*commandPool_, VK_IMAGE_LAYOUT_GENERAL);
-	computeSampler_ = std::make_unique<Sampler>(*device_, SamplerConfig{});
-	computeImageView_ = std::make_unique<ImageView>(*device_, computeImage_->Handle(), computeImage_->Format(), VK_IMAGE_ASPECT_COLOR_BIT);
-	computeImageDescriptorInfo_ = {};
-	computeImageDescriptorInfo_.imageLayout = VK_IMAGE_LAYOUT_GENERAL;
-	computeImageDescriptorInfo_.imageView = computeImageView_->Handle();
-	computeImageDescriptorInfo_.sampler = computeSampler_->Handle();
-}
-
-void Application::deleteComputeTargetImage()
-{
-	device_->WaitIdle();
-	computeSampler_.reset();
-	computeImageView_.reset();
-	computeImage_.reset();
-	computeImageMemory_.reset();
+	scene_.reset(new Scene(CommandPool()));
 }
 
 void Application::OnDeviceSet()
@@ -262,7 +222,7 @@ void Application::CreateViewport()
 	}
 	viewportInit = true;
 
-	quadPipeline_.reset(new SimpleQuadPipeline(SwapChain(), *viewportRenderPass_, quadUniformBuffers_, computeImageDescriptorInfo_));
+	quadPipeline_.reset(new SimpleQuadPipeline(SwapChain(), *viewportRenderPass_, quadUniformBuffers_, scene_->PositionBuffer()));
 
 
 }
@@ -279,11 +239,6 @@ void Application::DeleteViewPort()
 	viewportImageMemory_.clear();
 	viewportRenderPass_.reset();
 	viewportInit = false;
-}
-
-void Application::recordComputeCommands()
-{
-
 }
 
 void Application::DrawFrame()
@@ -315,24 +270,6 @@ void Application::DrawFrame()
 		DeleteViewPort();
 		CreateViewport();
 	}
-
-	/*vkWaitForFences(device_->Handle(), 1, &computeFence_->Handle(), VK_TRUE, UINT64_MAX);
-	vkResetFences(device_->Handle(), 1, &computeFence_->Handle());*/
-	computeFence_->Wait(noTimeout);
-	computeFence_->Reset();
-	const auto computeCmdBuffer = computeCommandBuffers_->Begin(0);
-	ComputePathTrace(computeCmdBuffer);
-	computeCommandBuffers_->End(0);
-	if (viewportInit)
-		computeTracer_->updateCameraUBO();
-
-	VkSubmitInfo computeSubmitInfo = {};
-	computeSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	computeSubmitInfo.commandBufferCount = 1;
-	computeSubmitInfo.pCommandBuffers = &computeCmdBuffer;
-
-	Check(vkQueueSubmit(device_->ComputeQueue(), 1, &computeSubmitInfo, computeFence_->Handle()),
-		"submit compute command buffer");
 
 	const auto commandBuffer = commandBuffers_->Begin(imageIndex);
 	Render(commandBuffer, imageIndex);
@@ -383,41 +320,15 @@ void Application::DrawFrame()
 	{
 		throw(std::runtime_error(std::string("failed to present next image (") + ToString(result) + ")"));
 	}
-	if (imgWidth != prevImgWidth || imgHeight != prevImgHeight)
-	{
-		deleteComputeTargetImage();
-		createComputeTargetImage();
-		quadPipeline_->updateQuadTextureDescriptor(quadUniformBuffers_, computeImageDescriptorInfo_);
-		computeTracer_->resizeComputeTarget(imgWidth, imgHeight, computeImageDescriptorInfo_);
-		prevImgWidth = imgWidth;
-		prevImgHeight = imgHeight;
-	}
 	currentFrame_ = (currentFrame_ + 1) % inFlightFences_.size();
-}
-
-void Application::ComputePathTrace(VkCommandBuffer commandBuffer)
-{
-	if (viewportInit)
-	{
-		if (device_->GraphicsFamilyIndex() != device_->ComputeFamilyIndex())
-		{
-			ImageMemoryBarrier::Insert(commandBuffer, computeImage_->Handle(), { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }, 0, VK_ACCESS_SHADER_WRITE_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_GENERAL);
-		}
-		computeTracer_->bindPipeline(commandBuffer);
-
-		VkDescriptorSet descriptorSets[] = { computeTracer_->ComputeTextureDescriptorSet() };
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, computeTracer_->PipelineLayout().Handle(), 0, 1, descriptorSets, 0, nullptr);
-
-		vkCmdDispatch(commandBuffer, (uint32_t)(std::ceil(imgWidth / 16.f)), (uint32_t)(std::ceil(imgHeight / 16.f)), 1);
-		if (device_->GraphicsFamilyIndex() != device_->ComputeFamilyIndex())
-		{
-			ImageMemoryBarrier::Insert(commandBuffer, computeImage_->Handle(), { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }, VK_ACCESS_SHADER_WRITE_BIT, 0, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_GENERAL);
-		}
-	}
 }
 
 void Application::Render(VkCommandBuffer commandBuffer, const uint32_t imageIndex)
 {
+	const auto prevTime = time_;
+	time_ = Window().GetTime();
+	frameTime = time_ - prevTime;
+	modelViewController_.UpdateCamera(2.f, frameTime);
 
 	std::array<VkClearValue, 2> clearValues = {};
 	clearValues[0].color = { {0.1f, 0.1f, 0.1f, 1.0f} };
@@ -437,15 +348,6 @@ void Application::Render(VkCommandBuffer commandBuffer, const uint32_t imageInde
 		renderPassInfo.pClearValues = clearValues.data();
 		renderPassInfo.renderArea.extent = viewportExtent_;
 
-		if (device_->GraphicsFamilyIndex() != device_->ComputeFamilyIndex())
-		{
-			ImageMemoryBarrier::Insert(commandBuffer, computeImage_->Handle(), { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }, 0, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_GENERAL);
-		}
-		else
-		{
-			ImageMemoryBarrier::Insert(commandBuffer, computeImage_->Handle(), { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }, VK_ACCESS_SHADER_WRITE_BIT, VK_ACCESS_SHADER_READ_BIT, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_GENERAL);
-		}
-
 		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 		VkViewport viewport{};
 		viewport.x = 0.0f;
@@ -458,16 +360,22 @@ void Application::Render(VkCommandBuffer commandBuffer, const uint32_t imageInde
 		vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 		vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 		{
-			quadPipeline_->bindPipeline(commandBuffer);
-			VkDescriptorSet descriptorSet[] = { quadPipeline_->DescriptorSet(imageIndex)};
-			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, quadPipeline_->PipelineLayout().Handle(), 0, 1, descriptorSet, 0, nullptr);
-			quadPipeline_->renderQuad(commandBuffer);
+			VkDescriptorSet descriptorSets[] = { quadPipeline_->DescriptorSet(imageIndex) };
+			VkBuffer vertexBuffers[] = { scene_->VertexBuffer().Handle() };
+			const VkBuffer indexBuffer = scene_->IndexBuffer().Handle();
+			VkDeviceSize offsets[] = { 0 };
+
+			vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, quadPipeline_->Handle());
+			vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, quadPipeline_->PipelineLayout().Handle(), 0, 1, descriptorSets, 0, nullptr);
+			vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+			vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+			uint32_t vertexOffset = 0;
+			uint32_t indexOffset = 0;
+			const auto vertexCount = scene_->NumVerts();
+			const auto indexCount = scene_->NumIndices();
+			vkCmdDrawIndexed(commandBuffer, indexCount, scene_->NumParticles(), 0, 0, 0);
 		}
 		vkCmdEndRenderPass(commandBuffer);
-		if (device_->GraphicsFamilyIndex() != device_->ComputeFamilyIndex())
-		{
-			ImageMemoryBarrier::Insert(commandBuffer, computeImage_->Handle(), { VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 }, VK_ACCESS_SHADER_WRITE_BIT, 0, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_GENERAL);
-		}
 		frameStats.viewImage = &viewportDsets_[imageIndex];
 	}
 
@@ -487,15 +395,49 @@ void Application::Render(VkCommandBuffer commandBuffer, const uint32_t imageInde
 	vkCmdEndRenderPass(commandBuffer);
 }
 
+void Application::OnKey(int key, int scancode, int action, int mods)
+{
+	
+
+	// Camera motions
+	
+	modelViewController_.OnKey(key, scancode, action, mods);
+}
+
+void Application::OnCursorPosition(double xpos, double ypos)
+{
+	if (!HasSwapChain())
+	{
+		return;
+	}
+
+	// Camera motions
+	modelViewController_.OnCursorPosition(xpos, ypos);
+}
+
+void Application::OnMouseButton(int button, int action, int mods)
+{
+	if (!HasSwapChain())
+	{
+		return;
+	}
+	modelViewController_.OnMouseButton(button, action, mods);
+}
+
+void Application::OnScroll(double xoffset, double yoffset)
+{
+}
+
 void Application::UpdateUniformBuffer(const uint32_t imageIndex)
 {
+	scene_->updatePositions(frameTime);
+	
 	UniformBufferObject ubo = {};
-	ubo.windowWidth = viewportExtent_.width;
-	ubo.windowHeight = viewportExtent_.height;
-	ubo.width = imgWidth;
-	ubo.height = imgHeight;
-	ubo.vignette = vignette;
+	ubo.ModelView = modelViewController_.ModelView();
+	ubo.Projection = glm::perspective(glm::radians(45.f), viewportExtent_.width / static_cast<float>(viewportExtent_.height), 0.1f, 10000.0f);
+	ubo.Particlescale = particleScale;
 	quadUniformBuffers_[imageIndex].SetValue(ubo);
+	scene_->updateBuffer(*commandPool_);
 }
 
 void Application::RecreateSwapChain()

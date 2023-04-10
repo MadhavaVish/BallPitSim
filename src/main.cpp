@@ -42,7 +42,7 @@ int main(int argc, const char* argv[]) noexcept
 		#else
 					false;
 		#endif
-		Vulkan::Application application(windowConfig, VkPresentModeKHR::VK_PRESENT_MODE_MAILBOX_KHR, EnableValidationLayers);
+		Vulkan::Application application(windowConfig, VkPresentModeKHR::VK_PRESENT_MODE_IMMEDIATE_KHR, EnableValidationLayers);
 
 		PrintVulkanSdkInformation();
 		//PrintVulkanInstanceInformation(application);

@@ -284,12 +284,7 @@ void UserInterface::DrawOverlay(const Statistics& stats, UserSettings& settings)
 		ImGui::Spacing();
 		if (ImGui::CollapsingHeader("Render Properties", ImGuiTreeNodeFlags_DefaultOpen))
 		{
-			ImGui::SliderInt("Width", settings.ImageWidth, 100, 3840);
-			ImGui::SliderInt("Height", settings.ImageHeight, 100, 2160);
-		}
-		if (ImGui::CollapsingHeader("Post Processing"))
-		{
-			ImGui::SliderFloat("Vignette", settings.Vignette, 0.001f, 0.3f);
+			ImGui::SliderFloat("Scale", settings.particleScale, 0.001f, 0.3f);
 		}
 		
 	}
