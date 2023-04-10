@@ -2,3 +2,8 @@ bin/
 bin-int/
 
 .vs/
+/imgui.ini
+/Particle Sim.sln
+/UnifiedParticleSim.vcxproj
+/UnifiedParticleSim.vcxproj.filters
+*.user
