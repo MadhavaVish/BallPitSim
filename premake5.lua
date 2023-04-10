@@ -15,11 +15,11 @@ project "UnifiedParticleSim"
    includedirs
    {
         "src",
-
         "vendor/glfw/include",
         "vendor/glm",
         "vendor/stb_image",
         "vendor/tiny_obj_loader",
+        "vendor/Eigen",
         "%{IncludeDir.VulkanSDK}",
         "%{IncludeDir.glm}",
    }

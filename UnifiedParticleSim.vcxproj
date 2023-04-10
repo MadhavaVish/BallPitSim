@@ -79,7 +79,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WL_PLATFORM_WINDOWS;WL_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\glfw\include;vendor\glm;vendor\stb_image;vendor\tiny_obj_loader;C:\VulkanSDK\1.3.239.0\Include;..\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\glfw\include;vendor\glm;vendor\stb_image;vendor\tiny_obj_loader;vendor\Eigen;C:\VulkanSDK\1.3.243.0\Include;..\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <OpenMPSupport>true</OpenMPSupport>
@@ -90,7 +90,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;C:\VulkanSDK\1.3.239.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;C:\VulkanSDK\1.3.243.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>vendor\GLFW\lib-vc2022;vendor\imgui\bin\Debug-windows-x86_64\ImGui;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -99,7 +99,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WL_PLATFORM_WINDOWS;WL_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\glfw\include;vendor\glm;vendor\stb_image;vendor\tiny_obj_loader;C:\VulkanSDK\1.3.239.0\Include;..\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\glfw\include;vendor\glm;vendor\stb_image;vendor\tiny_obj_loader;vendor\Eigen;C:\VulkanSDK\1.3.243.0\Include;..\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -116,7 +116,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>glfw3.lib;C:\VulkanSDK\1.3.239.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;C:\VulkanSDK\1.3.243.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>vendor\GLFW\lib-vc2022;vendor\imgui\bin\Debug-windows-x86_64\ImGui;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -125,7 +125,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WL_PLATFORM_WINDOWS;WL_DIST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\glfw\include;vendor\glm;vendor\stb_image;vendor\tiny_obj_loader;C:\VulkanSDK\1.3.239.0\Include;..\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\glfw\include;vendor\glm;vendor\stb_image;vendor\tiny_obj_loader;vendor\Eigen;C:\VulkanSDK\1.3.243.0\Include;..\vendor\glm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>None</DebugInformationFormat>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -142,7 +142,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>glfw3.lib;C:\VulkanSDK\1.3.239.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;C:\VulkanSDK\1.3.243.0\Lib\vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>vendor\GLFW\lib-vc2022;vendor\imgui\bin\Debug-windows-x86_64\ImGui;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -156,6 +156,9 @@
     <ClInclude Include="src\Gwaphics\ImGui\imstb_rectpack.h" />
     <ClInclude Include="src\Gwaphics\ImGui\imstb_textedit.h" />
     <ClInclude Include="src\Gwaphics\ImGui\imstb_truetype.h" />
+    <ClInclude Include="src\Gwaphics\PhysicsScene\Ball.hpp" />
+    <ClInclude Include="src\Gwaphics\PhysicsScene\BallLoader.hpp" />
+    <ClInclude Include="src\Gwaphics\PhysicsScene\Constraint.hpp" />
     <ClInclude Include="src\Gwaphics\PhysicsScene\Scene.hpp" />
     <ClInclude Include="src\Gwaphics\Pipelines\SimpleQuadPipeline.hpp" />
     <ClInclude Include="src\Gwaphics\Pipelines\UniformBuffer.hpp" />
@@ -242,11 +245,10 @@
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
     </ClCompile>
-    <ClCompile Include="src\Gwaphics\PhysicsScene\Scene.cpp">
-      <ExternalWarningLevel>Level3</ExternalWarningLevel>
-      <ExternalWarningLevel>Level3</ExternalWarningLevel>
-      <ExternalWarningLevel>Level3</ExternalWarningLevel>
-    </ClCompile>
+    <ClCompile Include="src\Gwaphics\PhysicsScene\Ball.cpp" />
+    <ClCompile Include="src\Gwaphics\PhysicsScene\BallLoader.cpp" />
+    <ClCompile Include="src\Gwaphics\PhysicsScene\Constraint.cpp" />
+    <ClCompile Include="src\Gwaphics\PhysicsScene\Scene.cpp" />
     <ClCompile Include="src\Gwaphics\Pipelines\SimpleQuadPipeline.cpp">
       <ExternalWarningLevel>Level3</ExternalWarningLevel>
       <ExternalWarningLevel>Level3</ExternalWarningLevel>

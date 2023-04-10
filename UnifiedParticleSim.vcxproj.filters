@@ -19,9 +19,6 @@
     <Filter Include="src\Gwaphics\ImGui\backends">
       <UniqueIdentifier>{2656BF09-9263-EDEF-1B4A-E9DA8756B9A6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\Gwaphics\PhysicsScene">
-      <UniqueIdentifier>{52DDD6B2-BE9F-0A3D-0750-99C97351E31A}</UniqueIdentifier>
-    </Filter>
     <Filter Include="src\Gwaphics\Pipelines">
       <UniqueIdentifier>{8A21E8D3-761B-1126-5F88-A7364B217792}</UniqueIdentifier>
     </Filter>
@@ -30,6 +27,9 @@
     </Filter>
     <Filter Include="src\Gwaphics\Vulkan">
       <UniqueIdentifier>{129373FB-7EF4-5009-0762-97BB73C287C8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Gwaphics\PhysicsScene">
+      <UniqueIdentifier>{8e831c9f-16da-4931-a0f2-556a91b9f160}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -59,9 +59,6 @@
     </ClInclude>
     <ClInclude Include="src\Gwaphics\ImGui\imstb_truetype.h">
       <Filter>src\Gwaphics\ImGui</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gwaphics\PhysicsScene\Scene.hpp">
-      <Filter>src\Gwaphics\PhysicsScene</Filter>
     </ClInclude>
     <ClInclude Include="src\Gwaphics\Pipelines\SimpleQuadPipeline.hpp">
       <Filter>src\Gwaphics\Pipelines</Filter>
@@ -192,6 +189,18 @@
     <ClInclude Include="src\UserSettings.hpp">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\Gwaphics\PhysicsScene\BallLoader.hpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\PhysicsScene\Constraint.hpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\PhysicsScene\Scene.hpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\PhysicsScene\Ball.hpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Gwaphics\Application.cpp">
@@ -217,9 +226,6 @@
     </ClCompile>
     <ClCompile Include="src\Gwaphics\ImGui\imgui_widgets.cpp">
       <Filter>src\Gwaphics\ImGui</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gwaphics\PhysicsScene\Scene.cpp">
-      <Filter>src\Gwaphics\PhysicsScene</Filter>
     </ClCompile>
     <ClCompile Include="src\Gwaphics\Pipelines\SimpleQuadPipeline.cpp">
       <Filter>src\Gwaphics\Pipelines</Filter>
@@ -325,6 +331,18 @@
     </ClCompile>
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\PhysicsScene\BallLoader.cpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\PhysicsScene\Constraint.cpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\PhysicsScene\Scene.cpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\PhysicsScene\Ball.cpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

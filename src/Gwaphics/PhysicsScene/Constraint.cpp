@@ -1,0 +1,161 @@
+#include "Constraint.hpp"
+
+//computes the impulse needed for all particles to resolve the velocity constraint, and corrects the velocities accordingly.
+//The velocities are a vector (vCOM1, w1, vCOM2, w2) in both input and output.
+//returns true if constraint was already valid with "currVelocities", and false otherwise (false means there was a correction done)
+//currCOMPositions is a 2x3 matrix, where each row is per one of the sides of the constraints; the rest of the relevant variables are similar, and so should the outputs be resized.
+bool Constraint::resolveVelocityConstraint(const MatrixXd& currCOMPositions, const MatrixXd& currConstPositions, const MatrixXd& currCOMVelocities, MatrixXd& correctedCOMVelocities, double tolerance, const float flexCoeff) {
+
+    /**************
+    TODO: write velocity correction procedure:
+    1. If the velocity Constraint is satisfied up to tolerate ("abs(Jv)<=tolerance"), set corrected values to original ones and return true
+
+    2. Otherwise, correct linear and angular velocities as learnt in class.
+
+    Note to differentiate between different constraint types; for inequality constraints you don't do anything unless it's unsatisfied.
+    
+
+    MatrixXd invMassMatrix = MatrixXd::Zero(12, 12);
+    RowVectorXd constGradient(12);
+
+    for (int i = 0; i < 3; i++) {
+        invMassMatrix(i, i) = this->invMass1;
+    }
+    for (int i = 3; i < 6; i++) {
+        invMassMatrix(i, i) = this->invMass2;
+    }
+
+    RowVector3d com1 = currCOMPositions.row(0);
+    RowVector3d com2 = currCOMPositions.row(1);
+
+    RowVector3d r1 = currVertexPositions.row(0) - com1;
+    RowVector3d r2 = currVertexPositions.row(1) - com2;
+    RowVector3d n = (currVertexPositions.row(0) - currVertexPositions.row(1));
+    n = n.normalized();
+
+    RowVector3d v1 = currCOMVelocities.row(0);
+    RowVector3d v2 = currCOMVelocities.row(1);
+
+    RowVectorXd j = RowVectorXd::Zero(12);
+    if (constraintType == COLLISION) {
+        j << refVector, r1.cross(refVector), -refVector, -r2.cross(refVector);
+    }
+    else if (constraintType == DISTANCE) {
+        j << n, r1.cross(n), -n, -r2.cross(n);
+    }
+
+    RowVectorXd v;
+    if (constraintType == COLLISION) {
+        v = RowVectorXd::Zero(6); v << v1, v2;
+        if (abs(j.dot(v)) <= tolerance) {
+            correctedCOMVelocities = currCOMVelocities;
+            return true;
+        }
+    }
+    else if (constraintType == DISTANCE) {
+        v = RowVectorXd::Zero(6); v << v1, v2;
+        double dist = (currVertexPositions.row(0) - currVertexPositions.row(1)).stableNorm();
+        if ((dist - refValue) < flexCoeff * refValue) {
+            correctedCOMVelocities = currCOMVelocities;
+            return true;
+        }
+    }
+
+
+    double num = (j * v.transpose())(0, 0);
+    double denom = (j * invMassMatrix * j.transpose())(0, 0);
+    double lagrange = 0;
+    if (constraintType == COLLISION) {
+        lagrange = -(1 + CRCoeff) * num / denom;
+    }
+    else if (constraintType == DISTANCE) {
+        lagrange = -1 * num / denom;
+    }
+
+    MatrixXd deltaV = MatrixXd::Zero(1, 12); deltaV = lagrange * invMassMatrix * j.transpose();
+
+    RowVector3d deltaV1; deltaV1 << deltaV(0), deltaV(1), deltaV(2);
+    RowVector3d deltaOmega1; deltaOmega1 << deltaV(3), deltaV(4), deltaV(5);
+    RowVector3d deltaV2; deltaV2 << deltaV(6), deltaV(7), deltaV(8);
+    RowVector3d deltaOmega2; deltaOmega2 << deltaV(9), deltaV(10), deltaV(11);
+
+    correctedCOMVelocities = MatrixXd::Zero(2, 3);
+    correctedCOMVelocities << (v1 + deltaV1), (v2 + deltaV2);
+    return false;
+    ***************/
+    return true;
+}
+
+//projects the position unto the constraint
+//returns true if constraint was already valid with "currPositions"
+bool Constraint::resolvePositionConstraint(const MatrixXd& currCOMPositions, const MatrixXd& currConstPositions, MatrixXd& correctedCOMPositions, double tolerance, const float flexCoeff) {
+
+    /**************
+        TODO: write position correction procedure:
+        1. If the position Constraint is satisfied up to tolerate ("abs(C(p)<=tolerance"), set corrected values to original ones and return true
+
+        2. Otherwise, correct COM position as learnt in class. Note that since this is a linear correction, correcting COM position == correcting all positions the same offset. the currConstPositions are used to measure the constraint, and the COM values are corrected accordingly to create the effect.
+
+        Note to differentiate between different constraint types; for inequality constraints you don't do anything unless it's unsatisfied.
+        ***************/
+
+    MatrixXd invMassMatrix = MatrixXd::Zero(6, 6);
+
+    for (int i = 0; i < 3; i++) {
+        invMassMatrix(i, i) = this->invMass1;
+    }
+    for (int i = 3; i < 6; i++) {
+        invMassMatrix(i, i) = this->invMass2;
+    }
+
+    RowVector3d com1 = currCOMPositions.row(0);
+    RowVector3d com2 = currCOMPositions.row(1);
+
+    RowVector3d r1 = currConstPositions.row(0);
+    RowVector3d r2 = currConstPositions.row(1);
+
+    RowVector3d n = r1 - r2;
+
+    RowVectorXd j = RowVectorXd::Zero(6);
+
+    if (constraintType == COLLISION) {
+        j << refVector, -refVector;
+    }
+    else if (constraintType == DISTANCE) {
+        j << n.normalized(), -n.normalized();
+    }
+
+    double num;
+    if (constraintType == COLLISION) {
+        num = refValue;
+        if (refValue <= tolerance) {
+            correctedCOMPositions = currCOMPositions;
+            return true;
+        }
+    }
+    else if (constraintType == DISTANCE) {
+        num = n.stableNorm() - refValue;
+        if (n.stableNorm() < (1 - flexCoeff) * refValue) num = n.stableNorm() - refValue * (1 - flexCoeff);
+        else if (n.stableNorm() > (1 + flexCoeff) * refValue) num = n.stableNorm() - refValue * (1 + flexCoeff);
+        else {
+            correctedCOMPositions = currCOMPositions;
+            return true;
+        }
+    }
+
+    double denom = (j * invMassMatrix * j.transpose())(0, 0);
+    double lagrange = -1 * num / denom;
+
+    MatrixXd deltaR = MatrixXd::Zero(1, 6); deltaR = lagrange * invMassMatrix * j.transpose();
+
+    Eigen::RowVector3d deltaR1; deltaR1 << deltaR(0), deltaR(1), deltaR(2);
+    RowVector3d deltaR2; deltaR2 << deltaR(3), deltaR(4), deltaR(5);
+
+    correctedCOMPositions = MatrixXd::Zero(2, 3);
+    correctedCOMPositions << (com1 + deltaR1), (com2 + deltaR2);
+    return false;
+}
+
+
+
+
