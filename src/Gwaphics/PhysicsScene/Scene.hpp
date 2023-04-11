@@ -3,6 +3,7 @@
 #include "../Vulkan/Buffer.hpp"
 #include "../Vulkan/BufferUtil.hpp"
 #include "../Vulkan/DeviceMemory.hpp"
+#include "SPHSolver.hpp"
 #include <Eigen/Dense>
 #include <memory>
 class Scene
@@ -13,8 +14,6 @@ public:
 	const Vulkan::Buffer& VertexBuffer() const { return *vertexBuffer_; }
 	const Vulkan::Buffer& IndexBuffer() const { return *indexBuffer_; }
 	const Vulkan::Buffer& PositionBuffer() const { return *positionBuffer_; }
-	const Vulkan::Buffer& MassBuffer() const { return *massBuffer_; }
-	const Vulkan::Buffer& SpeedBuffer() const { return *speedBuffer_; }
 	const uint32_t NumVerts() const { return vertices.size(); }
 	const uint32_t NumIndices() const { return indices.size(); }
 	const uint32_t NumParticles() const { return numParticles; }
@@ -22,6 +21,7 @@ public:
 	void updateBuffer(Vulkan::CommandPool& commandPool);
 	
 private:
+	std::unique_ptr <SPHSolver> solver;
 	std::vector<Vertex> vertices;
 	std::unique_ptr<Vulkan::Buffer> vertexBuffer_;
 	std::unique_ptr<Vulkan::DeviceMemory> vertexBufferMemory_;
@@ -34,11 +34,4 @@ private:
 	std::vector<glm::vec4> positions;
 	std::unique_ptr<Vulkan::Buffer> positionBuffer_;
 	std::unique_ptr<Vulkan::DeviceMemory> positionBufferMemory_;
-	std::vector<glm::vec4> velocities;
-	std::vector<float> masses;
-	std::unique_ptr<Vulkan::Buffer> massBuffer_;
-	std::unique_ptr<Vulkan::DeviceMemory> massBufferMemory_;
-	std::vector<float> speeds;
-	std::unique_ptr<Vulkan::Buffer> speedBuffer_;
-	std::unique_ptr<Vulkan::DeviceMemory> speedBufferMemory_;
 };

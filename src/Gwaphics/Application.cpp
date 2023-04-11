@@ -223,9 +223,7 @@ void Application::CreateViewport()
 	viewportInit = true;
 
 	quadPipeline_.reset(new SimpleQuadPipeline(SwapChain(), *viewportRenderPass_, quadUniformBuffers_, 
-		scene_->PositionBuffer(),
-		scene_->MassBuffer(), 
-		scene_->SpeedBuffer()));
+		scene_->PositionBuffer()));
 
 
 }

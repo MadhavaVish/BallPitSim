@@ -60,6 +60,12 @@
     <ClInclude Include="src\Gwaphics\ImGui\imstb_truetype.h">
       <Filter>src\Gwaphics\ImGui</Filter>
     </ClInclude>
+    <ClInclude Include="src\Gwaphics\PhysicsScene\Particle.hpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gwaphics\PhysicsScene\SPHSolver.hpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClInclude>
     <ClInclude Include="src\Gwaphics\PhysicsScene\Scene.hpp">
       <Filter>src\Gwaphics\PhysicsScene</Filter>
     </ClInclude>
@@ -217,6 +223,12 @@
     </ClCompile>
     <ClCompile Include="src\Gwaphics\ImGui\imgui_widgets.cpp">
       <Filter>src\Gwaphics\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\PhysicsScene\Particle.cpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gwaphics\PhysicsScene\SPHSolver.cpp">
+      <Filter>src\Gwaphics\PhysicsScene</Filter>
     </ClCompile>
     <ClCompile Include="src\Gwaphics\PhysicsScene\Scene.cpp">
       <Filter>src\Gwaphics\PhysicsScene</Filter>

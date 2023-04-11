@@ -5,7 +5,7 @@ void ModelViewController::Reset(const glm::mat4& modelView)
 {
 	const auto inverse = glm::inverse(modelView);
 
-	position_ = inverse * glm::vec4(0, 0, 0, 100);
+	position_ = inverse * glm::vec4(0, 0, 0, 10);
 	orientation_ = glm::mat4(glm::mat3(modelView));
 	
 	cameraRotX_ = 0;
