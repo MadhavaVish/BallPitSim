@@ -7,7 +7,6 @@
 #include <cstring>
 #include <iostream>
 #include <Eigen/Dense>
-#include <Eigen/Sparse>
 
 using namespace Eigen;
 using namespace std;
@@ -25,7 +24,6 @@ public:
     ~Constraint() {}
 
     int numFullB, numFullC;
-    vector<Constraint> constraints;
     void handleCollision(Vector3d& b1, Vector3d& b2, const double& depth, const RowVector3d& contactNormal, const RowVector3d& penPosition, const double CRCoeff, const double tolerance);
     int b1, b2;                     // Two vertices from the respective meshes - auxiliary data for users (constraint class shouldn't use that)
     double invMass1, invMass2;       // Inverse masses of two bodies

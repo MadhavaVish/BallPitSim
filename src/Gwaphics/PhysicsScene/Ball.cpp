@@ -2,34 +2,43 @@
 
 bool Ball::isCollide(const Ball& b, double& depth, RowVector3d& intNormal, RowVector3d& intPosition) {
 
+	if (meshId == b.meshId)  //collision does nothing
+		return false;
 
 	if ((isFixed && b.isFixed))  //collision does nothing
 		return false;
 
-	RowVector3d collisionVec = this->currPos - b.currPos;
-	double dist = fabs(collisionVec.norm() );
+	intNormal = (b.currPos - this->currPos);
+	
+	if (isFixed)
+		intNormal = normal;
+
+	if (b.isFixed)
+		intNormal = b.normal;
+
+	intNormal = intNormal.normalized();
+
+	RowVector3d collisionVec = b.currPos - this->currPos;
+	double dist = collisionVec.norm();
 
 	if (dist > 2*radius)
 		return false;
 
-	intNormal = collisionVec.normalized();
-
 	depth = 2 * radius - collisionVec.norm();
-	intPosition = b.currPos + collisionVec.normalized() * (radius - depth);
-
+	intPosition = this->currPos + collisionVec.normalized() * (radius - depth);
 
 	return true;
-
 }
 
 
 //Update the current position and orientation by integrating the linear and angular velocities, and update currV accordingly
 //You need to modify this according to its purpose
 void Ball::updatePosition(double timeStep) {
-	//just forward Euler now
+	
 	if (isFixed)
-		return;  //a fixed object is immobile
+		return;  // Not moving fixed object
 
+	//Forward Euler now
 	if (timeStep > 0) {;
 		currPos << currPos + velocity * timeStep;
 	}
@@ -41,9 +50,9 @@ void Ball::updatePosition(double timeStep) {
 void Ball::updateVelocity(double timeStep, const double dragCoeff) {
 
 	if (isFixed)
-		return;
+		return; // Not moving fixed object
 
-	Vector3d gravity; gravity << 0, -9.8, 0.0;
+	Vector3d gravity; gravity << 0, -0.98, 0.0;
 	velocity += gravity * timeStep;
 
 	velocity -= dragCoeff * velocity * timeStep;

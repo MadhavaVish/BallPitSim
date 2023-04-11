@@ -28,6 +28,12 @@ BallLoader::BallLoader(char const* path)
 			RowVector3d ball(x, y, z);
 			balls.push_back(ball);
 		}
+		else if (strcmp(lineHeader, "bn") == 0) {
+			float x, y, z;
+			fscanf(file, "%f %f %f\n", &x, &y, &z);
+			RowVector3d ball(x, y, z);
+			normals.push_back(ball);
+		}
 		else if (strcmp(lineHeader, "c") == 0) {
 			int a, b;
 			fscanf(file, "%d %d\n", &a, &b);
@@ -58,6 +64,10 @@ void BallLoader::write(char const* filename) {
 	//write into file
 	for (int i = 0; i < balls.size(); i++) {
 		fprintf(file, "b %f %f %f\n", balls[i][0], balls[i][1], balls[i][2]);
+	}
+
+	for (int i = 0; i < normals.size(); i++) {
+		fprintf(file, "bn %f %f %f\n", normals[i][0], normals[i][1], normals[i][2]);
 	}
 
 	for (int i = 0; i < constraints.size(); i++) {
