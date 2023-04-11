@@ -25,15 +25,18 @@ Scene::Scene(Vulkan::CommandPool& commandPool)
 	}
 	//for (auto position : positions)
 	//	std::cout << glm::to_string(position) << std::endl;
-	//std::cout << positions.size() << std::endl;
+	std::cout << positions.size() << std::endl;
 	constexpr auto flags = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 	Vulkan::BufferUtil::CreateDeviceBuffer(commandPool, "Vertices", VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | flags, vertices, vertexBuffer_, vertexBufferMemory_);
 	Vulkan::BufferUtil::CreateDeviceBuffer(commandPool, "Indices", VK_BUFFER_USAGE_INDEX_BUFFER_BIT | flags, indices, indexBuffer_, indexBufferMemory_);
 	Vulkan::BufferUtil::CreateDeviceBuffer(commandPool, "Positions", flags, positions, positionBuffer_, positionBufferMemory_);
+	Vulkan::BufferUtil::CreateDeviceBuffer(commandPool, "Colors", flags, ballsColor, colorBuffer_, colorBufferMemory_);
 }
 
 Scene::~Scene()
 {
+	colorBuffer_.reset();
+	colorBufferMemory_.reset();
 	positionBuffer_.reset();
 	positionBufferMemory_.reset();
 	indexBuffer_.reset();
@@ -143,13 +146,13 @@ void Scene::addBunny() {
 	RowVector3d translation = Vector3d(0.75,3,0.75);
 	for (int i = 0; i < balls.balls.size(); i++) {
 		this->balls.push_back(Ball(0, balls.balls.size() / 100.0, false, (balls.balls[i]/10)+ translation, balls.normals[i]));
-		this->ballsCol.push_back(glm::vec4(0.93, 0.85, 0.33,1.0));
+		this->ballsColor.push_back(glm::vec4(0.93, 0.85, 0.33,1.0));
 	}
 
 	for (int i = 0; i < balls.constraints.size(); i++) {
 		double initDist = (this->balls[balls.constraints[i][0]].origPos - this->balls[balls.constraints[i][1]].origPos).norm();
 		this->constraints.push_back(Constraint(DISTANCE, EQUALITY, initialBallNb + balls.constraints[i][0], initialBallNb + balls.constraints[i][1], balls.balls.size() / 100, balls.balls.size() / 100, this->balls[balls.constraints[i][1]].currPos - this->balls[balls.constraints[i][0]].currPos, initDist, 0.0));
-		this->ballsCol.push_back(glm::vec4(0.93, 0.33, 0.33, 1.0));
+		
 	}
 	
 }
@@ -161,5 +164,6 @@ void Scene::addPool() {
 	RowVector3d translation = Vector3d(0, 0, 0);
 	for (int i = 0; i < balls.balls.size(); i++) {
 		this->balls.push_back(Ball(1, 0, true, (balls.balls[i] / 10) + translation, balls.normals[i]));
+		this->ballsColor.push_back(glm::vec4(0.93, 0.33, 0.33, 1.0));
 	}
 }

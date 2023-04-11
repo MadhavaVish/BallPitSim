@@ -29,9 +29,10 @@ public:
 	const Vulkan::Buffer& VertexBuffer() const { return *vertexBuffer_; }
 	const Vulkan::Buffer& IndexBuffer() const { return *indexBuffer_; }
 	const Vulkan::Buffer& PositionBuffer() const { return *positionBuffer_; }
+	const Vulkan::Buffer& ColorBuffer() const { return *colorBuffer_; }
 	const uint32_t NumVerts() const { return vertices.size(); }
 	const uint32_t NumIndices() const { return indices.size(); }
-	const uint32_t NumParticles() const { return numParticles; }
+	const uint32_t NumParticles() const { return positions.size(); }
 	void updatePositions(double deltaTime);
 	void updateBuffer(Vulkan::CommandPool& commandPool);
 	void handleCollision(Ball& b1, Ball& b2, const double& invMass1, const double& invMass2, const double& depth, const RowVector3d& contactNormal, const RowVector3d& penPosition, const double CRCoeff, const double tolerance);
@@ -55,7 +56,9 @@ private:
 	std::vector<glm::vec4> velocities;
 
 	std::vector<Ball> balls;
-	std::vector<glm::vec4> ballsCol;
+	std::vector<glm::vec4> ballsColor;
+	std::unique_ptr<Vulkan::Buffer> colorBuffer_;
+	std::unique_ptr<Vulkan::DeviceMemory> colorBufferMemory_;
 	std::vector<Mesh> meshes;
 	std::vector<Constraint> constraints;
 };

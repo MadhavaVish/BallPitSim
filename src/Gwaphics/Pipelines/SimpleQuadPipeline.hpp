@@ -36,7 +36,9 @@ namespace Vulkan
 	class SimpleQuadPipeline
 	{
 	public:
-		SimpleQuadPipeline(const Vulkan::SwapChain& swapChain, const Vulkan::RenderPass& renderPass, const std::vector<Vulkan::UniformBuffer>& uniformBuffers, const Vulkan::Buffer& positionBuffer);
+		SimpleQuadPipeline(const Vulkan::SwapChain& swapChain, const Vulkan::RenderPass& renderPass, const std::vector<Vulkan::UniformBuffer>& uniformBuffers, 
+			const Vulkan::Buffer& positionBuffer,
+			const Vulkan::Buffer& colorBuffer);
 		~SimpleQuadPipeline();
 
 		VkDescriptorSet DescriptorSet(uint32_t index) const;

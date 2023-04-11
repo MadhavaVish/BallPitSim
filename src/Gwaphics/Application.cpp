@@ -222,7 +222,7 @@ void Application::CreateViewport()
 	}
 	viewportInit = true;
 
-	quadPipeline_.reset(new SimpleQuadPipeline(SwapChain(), *viewportRenderPass_, quadUniformBuffers_, scene_->PositionBuffer()));
+	quadPipeline_.reset(new SimpleQuadPipeline(SwapChain(), *viewportRenderPass_, quadUniformBuffers_, scene_->PositionBuffer(), scene_->ColorBuffer()));
 
 
 }
