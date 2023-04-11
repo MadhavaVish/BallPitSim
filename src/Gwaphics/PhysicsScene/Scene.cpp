@@ -21,7 +21,7 @@ Scene::Scene(Vulkan::CommandPool& commandPool)
 	Model model("assets/sphere.obj", vertices, indices);
 	std::cout << (vertices.size()) << std::endl;
 	uint32_t cubeLen = 10;
-	numParticles = 200;
+	numParticles = 1200;
 	/*positions.resize(numParticles);*/
 	std::mt19937 generator(123);
 	std::uniform_real_distribution<float> dis(0.0, 1.0);
@@ -31,7 +31,7 @@ Scene::Scene(Vulkan::CommandPool& commandPool)
 	for (uint32_t i = 0; i < numParticles; ++i)
 	{
 		Vertex vert;
-		glm::vec4 point = 60.f * glm::vec4(randomPointInSphere(dis(generator), dis(generator), dis(generator)), 0.f);
+		glm::vec4 point = 100.f * glm::vec4(randomPointInSphere(dis(generator), dis(generator), dis(generator)), 0.f);
 		positions.push_back(point);
 		glm::vec3 v = 2.f * glm::vec3(dis(generator), dis(generator), dis(generator)) - 1.f;
 		velocities.push_back(8.f*glm::vec4(v,0.f));
