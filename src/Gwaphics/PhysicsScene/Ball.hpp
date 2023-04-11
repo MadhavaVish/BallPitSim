@@ -11,7 +11,7 @@ using namespace std;
 
 class Ball {
 public:
-	const double radius = 0.1;
+	const double radius = 0.15;
 	RowVector3d origPos;   //original ball positions
 	RowVector3d currPos;   //current ball position
 	RowVector3d velocity;
@@ -36,7 +36,6 @@ public:
 	void integrate(double timeStep, const double dragCoeff);
 	void updatePosition(double timeStep);
 	void updateVelocity(double timeStep, const double dragCoeff);
-private:
 	int meshId;
 };
 

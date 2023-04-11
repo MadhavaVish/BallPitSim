@@ -17,12 +17,11 @@ public:
 	double currTime;
 	double currStep;
 	double physicsStepTime;
-	double timeStep = 0.05;
-	double CRCoeff = 1.0;
-	double flexCoeff = 0.2;
-	double dragCoeff = 0.01;
-	double tolerance = 10e-3;
-	int maxIterations = 100;
+	double timeStep = 0.0001;
+	double CRCoeff = 1.03;
+	double dragCoeff = 0.07;
+	double tolerance = 10e-4;
+	int maxIterations = 20e6;
 	bool isRunning = false;
 	Scene(Vulkan::CommandPool& commandPool);
 	~Scene();
@@ -35,10 +34,11 @@ public:
 	const uint32_t NumParticles() const { return positions.size(); }
 	void updatePositions(double deltaTime);
 	void updateBuffer(Vulkan::CommandPool& commandPool);
-	void handleCollision(Ball& b1, Ball& b2, const double& invMass1, const double& invMass2, const double& depth, const RowVector3d& contactNormal, const RowVector3d& penPosition, const double CRCoeff, const double tolerance);
+	
+	void handleCollision(Mesh& m1, Mesh& m2, int b1, int b2, const double& depth, const RowVector3d& contactNormal, const RowVector3d& penPosition, const double CRCoeff, const double tolerance);
 	void addBunny();
 	void addPool();
-	void updateScene(const double timeStep, const double CRCoeff, const double dragCoeff, const double tolerance, const int maxIterations, const float flexCoeff);
+	void updateScene(const double timeStep, const double CRCoeff, const double dragCoeff, const double tolerance, const int maxIterations);
 
 private:
 	std::vector<Vertex> vertices;

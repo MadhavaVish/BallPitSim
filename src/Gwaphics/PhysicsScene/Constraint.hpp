@@ -33,8 +33,8 @@ public:
     ConstraintType constraintType;  // The type of the constraint, and will affect the value and the gradient. This SHOULD NOT change after initialization!
     ConstraintEqualityType constraintEqualityType;  //whether the constraint is an equality or an inequality
 
-    bool resolvePositionConstraint(const MatrixXd& currCOMPositions, const MatrixXd& currConstPositions, MatrixXd& correctedCOMPositions, double tolerance, const float flexCoeff);
-    bool resolveVelocityConstraint(const MatrixXd& currCOMPositions, const MatrixXd& currVertexPositions, const MatrixXd& currCOMVelocities, MatrixXd& correctedCOMVelocities, double tolerance, const float flexCoeff);
+    bool resolvePositionConstraint(const MatrixXd& currCOMPositions, const MatrixXd& currConstPositions, MatrixXd& correctedCOMPositions, double tolerance);
+    bool resolveVelocityConstraint(const MatrixXd& currCOMPositions, const MatrixXd& currVertexPositions, const MatrixXd& currCOMVelocities, MatrixXd& correctedCOMVelocities, double tolerance);
 
 };
     

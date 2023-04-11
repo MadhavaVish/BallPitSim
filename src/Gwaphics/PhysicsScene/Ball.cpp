@@ -52,7 +52,7 @@ void Ball::updateVelocity(double timeStep, const double dragCoeff) {
 	if (isFixed)
 		return; // Not moving fixed object
 
-	Vector3d gravity; gravity << 0, -0.98, 0.0;
+	Vector3d gravity; gravity << 0, -0.098, 0.0;
 	velocity += gravity * timeStep;
 
 	velocity -= dragCoeff * velocity * timeStep;

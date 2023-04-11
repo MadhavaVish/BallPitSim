@@ -4,7 +4,7 @@
 //The velocities are a vector (vCOM1, w1, vCOM2, w2) in both input and output.
 //returns true if constraint was already valid with "currVelocities", and false otherwise (false means there was a correction done)
 //currCOMPositions is a 2x3 matrix, where each row is per one of the sides of the constraints; the rest of the relevant variables are similar, and so should the outputs be resized.
-bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, const MatrixXd& currConstPositions, const MatrixXd& currBallVelocities, MatrixXd& correctedCOMVelocities, double tolerance, const float flexCoeff) {
+bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, const MatrixXd& currConstPositions, const MatrixXd& currBallVelocities, MatrixXd& correctedCOMVelocities, double tolerance) {
 
     /**************
     1. If the velocity Constraint is satisfied up to tolerate ("abs(Jv)<=tolerance"), set corrected values to original ones and return true
@@ -13,6 +13,7 @@ bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, co
 
     Note to differentiate between different constraint types; for inequality constraints you don't do anything unless it's unsatisfied.
     ***************/
+
 
     Matrix<double, 6, 6> invMassMatrix = Matrix<double, 6, 6>::Zero();
 
@@ -43,7 +44,7 @@ bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, co
     }
     else if (constraintType == DISTANCE) {
         double dist = (b1 - b2).stableNorm();
-        if ((dist - refValue) < flexCoeff * refValue) {
+        if ((dist - refValue) <  refValue) {
             correctedCOMVelocities = currBallVelocities;
             return true;
         }
@@ -63,11 +64,7 @@ bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, co
     Vector<double, 6> deltaV = Vector<double, 6>::Zero(); deltaV = lagrange * invMassMatrix * j.transpose();
 
     RowVector3d deltaV1; deltaV1 << deltaV(0), deltaV(1), deltaV(2);
-    if (refVector.dot(v1)>0)
-        deltaV1 << -deltaV(0), -deltaV(1), -deltaV(2);
     RowVector3d deltaV2; deltaV2 << deltaV(3), deltaV(4), deltaV(5);
-    if (refVector.dot(v2)>0)
-        deltaV2 << -deltaV(3), -deltaV(4), -deltaV(5);
 
     correctedCOMVelocities = MatrixXd::Zero(2, 3);
     correctedCOMVelocities << (v1 + deltaV1), (v2 + deltaV2);
@@ -76,7 +73,7 @@ bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, co
 
 //projects the position unto the constraint
 //returns true if constraint was already valid with "currPositions"
-bool Constraint::resolvePositionConstraint(const MatrixXd& currBallPositions, const MatrixXd& currConstPositions, MatrixXd& correctedBallPositions, double tolerance, const float flexCoeff) {
+bool Constraint::resolvePositionConstraint(const MatrixXd& currBallPositions, const MatrixXd& currConstPositions, MatrixXd& correctedBallPositions, double tolerance) {
 
     /**************
         TODO: write position correction procedure:
@@ -123,9 +120,7 @@ bool Constraint::resolvePositionConstraint(const MatrixXd& currBallPositions, co
     }
     else if (constraintType == DISTANCE) {
         num = n.stableNorm() - refValue;
-        if (n.stableNorm() < (1 - flexCoeff) * refValue) num = n.stableNorm() - refValue * (1 - flexCoeff);
-        else if (n.stableNorm() > (1 + flexCoeff) * refValue) num = n.stableNorm() - refValue * (1 + flexCoeff);
-        else {
+        if (abs(num) <= tolerance) {
             correctedBallPositions = currBallPositions;
             return true;
         }
