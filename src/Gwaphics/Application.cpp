@@ -222,7 +222,10 @@ void Application::CreateViewport()
 	}
 	viewportInit = true;
 
-	quadPipeline_.reset(new SimpleQuadPipeline(SwapChain(), *viewportRenderPass_, quadUniformBuffers_, scene_->PositionBuffer()));
+	quadPipeline_.reset(new SimpleQuadPipeline(SwapChain(), *viewportRenderPass_, quadUniformBuffers_, 
+		scene_->PositionBuffer(),
+		scene_->MassBuffer(), 
+		scene_->SpeedBuffer()));
 
 
 }
@@ -328,7 +331,7 @@ void Application::Render(VkCommandBuffer commandBuffer, const uint32_t imageInde
 	const auto prevTime = time_;
 	time_ = Window().GetTime();
 	frameTime = time_ - prevTime;
-	modelViewController_.UpdateCamera(2.f, frameTime);
+	modelViewController_.UpdateCamera(50.f, frameTime);
 
 	std::array<VkClearValue, 2> clearValues = {};
 	clearValues[0].color = { {0.1f, 0.1f, 0.1f, 1.0f} };

@@ -81,7 +81,10 @@ namespace Vulkan
         configInfo.attributeDescriptions = {};
     }
 
-	SimpleQuadPipeline::SimpleQuadPipeline(const Vulkan::SwapChain& swapChain, const Vulkan::RenderPass& renderPass, const std::vector<Vulkan::UniformBuffer>& uniformBuffers, const Vulkan::Buffer& positionBuffer)
+	SimpleQuadPipeline::SimpleQuadPipeline(const Vulkan::SwapChain& swapChain, const Vulkan::RenderPass& renderPass, const std::vector<Vulkan::UniformBuffer>& uniformBuffers, 
+        const Vulkan::Buffer& positionBuffer,
+        const Vulkan::Buffer& massBuffer, 
+        const Vulkan::Buffer& speedBuffer)
 	: swapChain_(swapChain)
 	{
 		const auto& device = swapChain.Device();
@@ -89,6 +92,8 @@ namespace Vulkan
 		{ 
 			{0, 1, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
             {1, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
+            {2, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
+            {3, 1, VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, VK_SHADER_STAGE_VERTEX_BIT},
 		};
 
 		descriptorSetManager_.reset(new DescriptorSetManager(device, descriptorBindings, uniformBuffers.size()));
@@ -103,9 +108,17 @@ namespace Vulkan
             VkDescriptorBufferInfo positionBufferInfo = {};
             positionBufferInfo.buffer = positionBuffer.Handle();
             positionBufferInfo.range = VK_WHOLE_SIZE;
+            VkDescriptorBufferInfo massBufferInfo = {};
+            massBufferInfo.buffer = massBuffer.Handle();
+            massBufferInfo.range = VK_WHOLE_SIZE;
+            VkDescriptorBufferInfo speedBufferInfo = {};
+            speedBufferInfo.buffer = speedBuffer.Handle();
+            speedBufferInfo.range = VK_WHOLE_SIZE;
 
             descriptorWrites.push_back(descriptorSets.Bind(i, 0, uniformBufferInfo));
             descriptorWrites.push_back(descriptorSets.Bind(i, 1, positionBufferInfo));
+            descriptorWrites.push_back(descriptorSets.Bind(i, 2, massBufferInfo));
+            descriptorWrites.push_back(descriptorSets.Bind(i, 3, speedBufferInfo));
 		    descriptorSets.UpdateDescriptors(i, descriptorWrites); 
 
 		}
