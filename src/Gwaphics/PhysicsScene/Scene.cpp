@@ -12,7 +12,6 @@ Scene::Scene(Vulkan::CommandPool& commandPool)
 	numParticles = this->balls.size();
 	currTime = 0;
 	currStep = 0;
-	physicsStepTime = 0.1;
 	/*positions.resize(numParticles);*/
 	std::mt19937 generator(123);
 	std::uniform_real_distribution<float> dis(0.0, 1.0);
@@ -88,11 +87,12 @@ void Scene::handleCollision(Mesh& m1, Mesh& m2, int b1, int b2, const double& de
 
 	if (!velocityWasValid) {
 		//only update the COM and angular velocity, don't both updating all currV because it might change again during this loop!
-		if (correctedBallVelocities.row(0).norm() < 0.15 && ball1.velocity.norm() < 0.15) {
+
+		if (correctedBallVelocities.row(0).norm() < 0.1 && ball1.velocity.norm() < 0.1) {
 			ball1.isFixed = true;
 		}
 		ball1.velocity =  correctedBallVelocities.row(0);
-		if (correctedBallVelocities.row(1).norm() < 0.15 && ball2.velocity.norm() < 0.15) {
+		if (correctedBallVelocities.row(1).norm() < 0.1 && ball2.velocity.norm() < 0.1) {
 			ball2.isFixed = true;
 		}
 		ball2.velocity =  correctedBallVelocities.row(1);

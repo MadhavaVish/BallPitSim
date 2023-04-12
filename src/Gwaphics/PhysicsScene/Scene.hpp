@@ -16,10 +16,9 @@ class Scene
 public:
 	double currTime;
 	double currStep;
-	double physicsStepTime;
-	double timeStep = 0.0001;
-	double CRCoeff = 1.03;
-	double dragCoeff = 0.07;
+	double physicsStepTime = 0.1;
+	double CRCoeff = 1.05;
+	double dragCoeff = 0.06;
 	double tolerance = 10e-4;
 	int maxIterations = 20e6;
 	bool isRunning = false;
