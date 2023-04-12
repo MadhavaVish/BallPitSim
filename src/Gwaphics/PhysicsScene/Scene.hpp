@@ -18,7 +18,7 @@ public:
 	double currStep;
 	double physicsStepTime = 0.1;
 	double CRCoeff = 1.05;
-	double dragCoeff = 0.06;
+	double dragCoeff = 0.07;
 	double tolerance = 10e-4;
 	int maxIterations = 20e6;
 	bool isRunning = false;
