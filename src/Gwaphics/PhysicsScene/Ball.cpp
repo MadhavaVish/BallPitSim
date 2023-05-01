@@ -4,8 +4,8 @@ bool Ball::isCollide(const Ball& b, double& depth, RowVector3d& intNormal, RowVe
 	
 	double r = this->radius;
 
-	if (meshId == b.meshId)  //collision does nothing
-		return false; //r=0.05
+	if (meshId == b.meshId)  //collision is respecting a smaller radius in order to lower collision detection within same mesh
+		r = this->insideRadius;
 
 	if ((isFixed && b.isFixed))  //collision does nothing
 		return false;
@@ -30,7 +30,12 @@ bool Ball::isCollide(const Ball& b, double& depth, RowVector3d& intNormal, RowVe
 		return false;
 
 	depth = 2 * r - collisionVec.norm();
-	intPosition = this->currPos + collisionVec.normalized() * (r - depth);
+	if (isFixed || b.isFixed) {
+		intPosition = this->currPos + collisionVec * (r - depth);
+	}
+	else {
+		intPosition = this->currPos + collisionVec.normalized() * (r - depth);
+	}
 
 	return true;
 }

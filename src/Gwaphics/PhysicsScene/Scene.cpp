@@ -94,8 +94,7 @@ void Scene::handleCollision(Mesh& m1, Mesh& m2, int b1, int b2, const double& de
 			for (int k = meshes[ball1.meshId].globalOffset; k < meshes[ball1.meshId].globalOffset + meshes[ball1.meshId].length; k++) {
 				if (k != b1) {
 					double dist = (balls[k].currPos - balls[b1].currPos).norm();
-					if (dist > 1e-3)
-						balls[k].velocity += 1/(1000*dist) * correctedBallVelocities.row(0);
+					balls[k].velocity += 1/(1000*dist) * correctedBallVelocities.row(0);
 				}
 			}
 		}
@@ -104,8 +103,7 @@ void Scene::handleCollision(Mesh& m1, Mesh& m2, int b1, int b2, const double& de
 			for (int k = meshes[ball2.meshId].globalOffset; k < meshes[ball2.meshId].globalOffset + meshes[ball2.meshId].length; k++) {
 				if (k != b2) {
 					double dist = (balls[k].currPos - balls[b2].currPos).norm();
-					if (dist > 1e-3)
-						balls[k].velocity += 1 / (1000 * dist) * correctedBallVelocities.row(1);
+					balls[k].velocity += 1 / (1000 * dist) * correctedBallVelocities.row(1);
 				}
 			}
 		}

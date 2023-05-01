@@ -135,6 +135,7 @@ bool Constraint::resolvePositionConstraint(const MatrixXd& currBallPositions, co
     RowVector3d deltaR2; deltaR2 << deltaR(3), deltaR(4), deltaR(5);
 
     correctedBallPositions = MatrixXd::Zero(2, 3);
+    // (Heuristic) Push back in the middle of the tolerance space along this axis 
     correctedBallPositions << (com1 + deltaR1 * (1 - tolerance/2)), (com2 + deltaR2 * (1 - tolerance/2));
     return false;
 }
