@@ -86,33 +86,26 @@ void Scene::handleCollision(Mesh& m1, Mesh& m2, int b1, int b2, const double& de
 	bool velocityWasValid = currConstraint.resolveVelocityConstraint(currBallPositions, currConstPositions, currBallVelocities, correctedBallVelocities, tolerance);
 
 	if (!velocityWasValid) {
-		//only update the COM and angular velocity, don't both updating all currV because it might change again during this loop!
 
-		if (correctedBallVelocities.row(0).norm() < 0.1 && ball1.velocity.norm() < 0.1) {
-			ball1.isFixed = true;
-		}
 		ball1.velocity =  correctedBallVelocities.row(0);
-		if (correctedBallVelocities.row(1).norm() < 0.1 && ball2.velocity.norm() < 0.1) {
-			ball2.isFixed = true;
-		}
 		ball2.velocity =  correctedBallVelocities.row(1);
+
 		if (correctedBallVelocities.row(0).norm() > 1e-3) {
 			for (int k = meshes[ball1.meshId].globalOffset; k < meshes[ball1.meshId].globalOffset + meshes[ball1.meshId].length; k++) {
 				if (k != b1) {
 					double dist = (balls[k].currPos - balls[b1].currPos).norm();
 					if (dist > 1e-3)
-						balls[k].velocity += 1/(2000*dist) * correctedBallVelocities.row(0);
+						balls[k].velocity += 1/(1000*dist) * correctedBallVelocities.row(0);
 				}
 			}
 		}
-		
 
 		if (correctedBallVelocities.row(1).norm() > 1e-3) {
 			for (int k = meshes[ball2.meshId].globalOffset; k < meshes[ball2.meshId].globalOffset + meshes[ball2.meshId].length; k++) {
 				if (k != b2) {
 					double dist = (balls[k].currPos - balls[b2].currPos).norm();
 					if (dist > 1e-3)
-						balls[k].velocity += 1 / (2000 * dist) * correctedBallVelocities.row(0);
+						balls[k].velocity += 1 / (1000 * dist) * correctedBallVelocities.row(1);
 				}
 			}
 		}
@@ -186,7 +179,6 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 			zeroStreak++;
 		}
 		else {
-			//only update the COM and angular velocity, don't both updating all currV because it might change again during this loop!
 			zeroStreak = 0;
 			balls[currConstraint.b1].velocity = correctedCOMVelocities.row(0);
 			balls[currConstraint.b2].velocity = correctedCOMVelocities.row(1);
@@ -230,7 +222,7 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 		else {
 			//only update the COM and angular velocity, don't both updating all currV because it might change again during this loop!
 			zeroStreak = 0;
-			
+
 			balls[currConstraint.b1].currPos = correctedCOMPositions.row(0);
 			balls[currConstraint.b2].currPos = correctedCOMPositions.row(1);
 

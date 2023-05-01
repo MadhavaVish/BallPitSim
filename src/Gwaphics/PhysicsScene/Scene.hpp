@@ -17,10 +17,10 @@ public:
 	double currTime;
 	double currStep;
 	double physicsStepTime = 0.1;
-	double CRCoeff = 1.05;
-	double dragCoeff = 0.07;
-	double tolerance = 10e-4;
-	int maxIterations = 20e6;
+	double CRCoeff = 1.0;
+	double dragCoeff = 0.0;
+	double tolerance = 1e-3;
+	int maxIterations = 10e6;
 	bool isRunning = false;
 	Scene(Vulkan::CommandPool& commandPool);
 	~Scene();

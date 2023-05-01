@@ -11,7 +11,7 @@ using namespace std;
 
 class Ball {
 public:
-	const double radius = 0.15;
+	const double radius = 0.05;
 	RowVector3d origPos;   //original ball positions
 	RowVector3d currPos;   //current ball position
 	RowVector3d velocity;

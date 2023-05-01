@@ -1,31 +1,36 @@
 #include "Ball.hpp"
 
 bool Ball::isCollide(const Ball& b, double& depth, RowVector3d& intNormal, RowVector3d& intPosition) {
+	
+	double r = this->radius;
 
 	if (meshId == b.meshId)  //collision does nothing
-		return false;
+		return false; //r=0.05
 
 	if ((isFixed && b.isFixed))  //collision does nothing
 		return false;
 
 	intNormal = (b.currPos - this->currPos);
-	
+	intNormal = intNormal.normalized();
+
 	if (isFixed)
 		intNormal = normal;
 
 	if (b.isFixed)
 		intNormal = b.normal;
 
-	intNormal = intNormal.normalized();
-
 	RowVector3d collisionVec = b.currPos - this->currPos;
 	double dist = collisionVec.norm();
 
-	if (dist > 2*radius)
+	if (isFixed || b.isFixed) {
+		collisionVec = intNormal * intNormal.dot(collisionVec);
+	}
+
+	if (dist > 2*r)
 		return false;
 
-	depth = 2 * radius - collisionVec.norm();
-	intPosition = this->currPos + collisionVec.normalized() * (radius - depth);
+	depth = 2 * r - collisionVec.norm();
+	intPosition = this->currPos + collisionVec.normalized() * (r - depth);
 
 	return true;
 }
@@ -55,7 +60,7 @@ void Ball::updateVelocity(double timeStep, const double dragCoeff) {
 	Vector3d gravity; gravity << 0, -0.098, 0.0;
 	velocity += gravity * timeStep;
 
-	velocity -= dragCoeff * velocity * timeStep;
+	velocity =  (1 - (dragCoeff * timeStep)) * velocity;
 }
 
 

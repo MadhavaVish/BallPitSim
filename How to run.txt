@@ -1,2 +1,2 @@
 1/ Install Vulkan
-2/ Run setup.bat in the scripts folder and that should generate the visual studio files :)
+2/ Run scripts/setup.bat in the scripts folder and that should generate the visual studio files :)
