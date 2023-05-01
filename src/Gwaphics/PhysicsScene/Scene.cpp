@@ -90,23 +90,6 @@ void Scene::handleCollision(Mesh& m1, Mesh& m2, int b1, int b2, const double& de
 		ball1.velocity =  correctedBallVelocities.row(0);
 		ball2.velocity =  correctedBallVelocities.row(1);
 
-		if (correctedBallVelocities.row(0).norm() > 1e-3) {
-			for (int k = meshes[ball1.meshId].globalOffset; k < meshes[ball1.meshId].globalOffset + meshes[ball1.meshId].length; k++) {
-				if (k != b1) {
-					double dist = (balls[k].currPos - balls[b1].currPos).norm();
-					balls[k].velocity += 1/(1000*dist) * correctedBallVelocities.row(0);
-				}
-			}
-		}
-
-		if (correctedBallVelocities.row(1).norm() > 1e-3) {
-			for (int k = meshes[ball2.meshId].globalOffset; k < meshes[ball2.meshId].globalOffset + meshes[ball2.meshId].length; k++) {
-				if (k != b2) {
-					double dist = (balls[k].currPos - balls[b2].currPos).norm();
-					balls[k].velocity += 1 / (1000 * dist) * correctedBallVelocities.row(1);
-				}
-			}
-		}
 	}
 
 	bool positionWasValid = currConstraint.resolvePositionConstraint(currBallPositions, currConstPositions, correctedBallPositions, tolerance);
