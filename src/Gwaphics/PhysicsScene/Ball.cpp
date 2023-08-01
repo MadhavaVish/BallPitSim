@@ -64,7 +64,18 @@ void Ball::resolve(double timeStep) {
 	if (n != 0) {
 		predictedP += dx / n;
 		pos += dx / n;
-		velocity += (dv / n) +  ((predictedP - pos)/timeStep);
+		velocity += (dv / n);// +((predictedP - pos) / timeStep);
+	}
+
+	dx = RowVector3d::Zero();
+	dv = RowVector3d::Zero();
+	n = 0;
+}
+
+void Ball::resolvePredicted(double timeStep) {
+	if (n != 0) {
+		predictedP += dx / n;
+		velocity += (dv / n);// +((predictedP - pos) / timeStep);
 	}
 
 	dx = RowVector3d::Zero();

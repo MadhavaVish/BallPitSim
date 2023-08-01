@@ -20,7 +20,7 @@ public:
 	double CRCoeff = 1.0;
 	double dragCoeff = 0.0;
 	double tolerance = 1e-3;
-	int maxIterations = 1e5;
+	int maxIterations = 1e3;
 	bool isRunning = false;
 	Scene(Vulkan::CommandPool& commandPool);
 	~Scene();

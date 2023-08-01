@@ -140,11 +140,11 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 	int currConstIndex = 0;
 	while ((zeroStreak < contactConstraints.size()) && (currIteration < maxIterations)) {
 		for (int i = 0; i < contactConstraints.size(); i++) {
-			Constraint currConst = contactConstraints[currConstIndex];
+			Constraint currConst = contactConstraints[i];
 			handleCollision(currConst);
 		}
 		for (int i = 0; i < contactConstraints.size(); i++) {
-			Constraint currConst = contactConstraints[currConstIndex];
+			Constraint currConst = contactConstraints[i];
 			balls[currConst.b1].resolve(timeStep);
 			balls[currConst.b2].resolve(timeStep);
 			if (!balls[currConst.b1].isCollide(balls[currConst.b2], depth, contactNormal, penPosition)) zeroStreak++;
@@ -154,97 +154,70 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 	}
 	contactConstraints.clear();
 
-	// CHECKED WITH PAPER VERSION TILL HERE
-
 	//Resolving user constraints iteratively until either:
 	//1. Positions or velocities are valid up to tolerance (a full streak of validity in the iteration)
 	//2. maxIterations has run out
 
-	//Resolving velocity
+	//Resolving velocity & position
 	currIteration = 0;
 	zeroStreak = 0;  //how many consecutive constraints are already below tolerance without any change; the algorithm stops if all are.
 	currConstIndex = 0;
 	while ((zeroStreak < constraints.size()) && (currIteration < maxIterations)) {
 
-		Constraint currConstraint = constraints[currConstIndex];
+		for (int i = 0; i < constraints.size(); i++) {
+			Constraint c = constraints[i];
 
-		RowVector3d currConstPos1 = balls[currConstraint.b1].predictedP;
-		RowVector3d currConstPos2 = balls[currConstraint.b2].predictedP;
+			Ball& ball1 = balls[c.b1];
+			Ball& ball2 = balls[c.b2];
 
-		MatrixXd currBallPositions(2, 3); currBallPositions << currConstPos1, currConstPos2;
-		MatrixXd currConstPositions(2, 3); currConstPositions << currConstPos1, currConstPos2;
-		MatrixXd currBallVelocities(2, 3); currBallVelocities << balls[currConstraint.b1].velocity, balls[currConstraint.b2].velocity;
+			Matrix<double, 2, 3> currBallPositions; currBallPositions << ball1.predictedP, ball2.predictedP;
+			Matrix<double, 2, 3> currConstPositions; currConstPositions << ball1.predictedP, ball2.predictedP;
+			Matrix<double, 2, 3> currBallVelocities; currBallVelocities << ball1.velocity, ball2.velocity;
 
-		MatrixXd deltaValVel;
+			MatrixXd deltaValVel, deltaValPos;
 
-		bool velocityWasValid = currConstraint.resolveVelocityConstraint(currBallPositions, currConstPositions, currBallVelocities, deltaValVel, tolerance);
+			// TODO : Suggested method store lastPos and currPos and update velocity according to the difference between those and not updateVel here
 
-		if (velocityWasValid) {
-			zeroStreak++;
+			bool velocityWasValid = c.resolveVelocityConstraint(currBallPositions, currConstPositions, currBallVelocities, deltaValVel, tolerance);
+
+			if (!velocityWasValid) {
+				zeroStreak = 0;
+				ball1.dv += deltaValVel.row(0);
+				ball2.dv += deltaValVel.row(1);
+			}
+
+			bool positionWasValid = c.resolvePositionConstraint(currBallPositions, currConstPositions, deltaValPos, tolerance);
+
+			if (!positionWasValid) {
+				zeroStreak = 0;
+
+				ball1.dx += deltaValPos.row(0);
+				ball2.dx += deltaValPos.row(1);
+			}
+
+			if (velocityWasValid && positionWasValid) zeroStreak++;
+			else { ball1.n++; ball2.n++; }
 		}
-		else {
-			zeroStreak = 0;
-			balls[currConstraint.b1].velocity += deltaValVel.row(0);
-			balls[currConstraint.b2].velocity += deltaValVel.row(1);
 
-		}
-
-		currIteration++;
-		currConstIndex = (currConstIndex + 1) % (constraints.size());
-	}
-
-	if (currIteration * constraints.size() >= maxIterations)
-		cout << "Velocity Constraint resolution reached maxIterations without resolving!" << endl;
-
-	//Resolving position
-	currIteration = 0;
-	zeroStreak = 0;  //how many consecutive constraints are already below tolerance without any change; the algorithm stops if all are.
-	currConstIndex = 0;
-	while ((zeroStreak < constraints.size()) && (currIteration * constraints.size() < maxIterations)) {
-
-		Constraint currConstraint = constraints[currConstIndex];
-
-
-		RowVector3d currConstPos1 = balls[currConstraint.b1].predictedP;
-		RowVector3d currConstPos2 = balls[currConstraint.b2].predictedP;
-
-		MatrixXd currCOMPositions(2, 3); currCOMPositions << currConstPos1, currConstPos2;
-		MatrixXd currConstPositions(2, 3); currConstPositions << currConstPos1, currConstPos2;
-
-		MatrixXd deltaValPos;
-
-		bool positionWasValid = currConstraint.resolvePositionConstraint(currCOMPositions, currConstPositions, deltaValPos, tolerance);
-
-		if (positionWasValid) {
-			zeroStreak++;
-		}
-		else {
-			//only update the COM and angular velocity, don't both updating all currV because it might change again during this loop!
-			zeroStreak = 0;
-
-			balls[currConstraint.b1].predictedP += deltaValPos.row(0);
-			balls[currConstraint.b2].predictedP += deltaValPos.row(1);
-
+		for (int i = 0; i < constraints.size(); i++) {
+			Constraint currConst = constraints[i];
+			balls[currConst.b1].resolvePredicted(timeStep);
+			balls[currConst.b2].resolvePredicted(timeStep);
 		}
 
 		currIteration++;
 		currConstIndex = (currConstIndex + 1) % (constraints.size());
+
 	}
-
 	if (currIteration * constraints.size() >= maxIterations)
-		cout << "Position Constraint resolution reached maxIterations without resolving!" << endl;
-
-	//TODO (6) Sleeping
-	/*
-		for all particles i do
-		update velocity vi <= 1 / dt * (xi_new - xi)
-		advect diffuse particles
-		apply internal forces fdrag, fvort
-		update positions xi <= xi_new or apply sleeping
-		end for
-	 */
+		cout << "Constraint solving reached maxIterations !" << endl;
 
 	for (int i = 0; i < balls.size(); i++) {
+	/*	update velocity vi <= 1 / dt * (xi_new - xi)
+		advect diffuse particles
+		apply internal forces fdrag, fvort */
+		balls[i].velocity = balls[i].velocity * 0.99;
+		if (balls[i].velocity.norm() < tolerance) balls[i].velocity = RowVector3d::Zero() ; else balls[i].pos = balls[i].predictedP;
 		velocities[i] = glm::vec4(balls[i].velocity[0], -balls[i].velocity[1], balls[i].velocity[2], 0.0f);
 		positions[i] = glm::vec4(balls[i].predictedP[0], -balls[i].predictedP[1], balls[i].predictedP[2], 0.0f);
 	}

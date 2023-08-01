@@ -50,6 +50,7 @@ public:
 	bool isCollide(const Ball& b, double& depth, RowVector3d& intNormal, RowVector3d& intPosition);
 	void integrate(double timeStep, const double dragCoeff);
 	void resolve(double timeStep);
+	void resolvePredicted(double timeStep);
 	void updatePosition(double timeStep);
 	void updateVelocity(double timeStep, const double dragCoeff);
 };
