@@ -133,6 +133,8 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 		}
 	}
 
+	// CHECKED WITH PAPER VERSION TILL HERE
+
 	for (int i = 0; i < contactConstraints.size(); i++) {
 		handleCollision(contactConstraints[i]); // meshes[i], meshes[j], k, l, depth, contactNormal, penPosition, CRCoeff, tolerance);
 	}
