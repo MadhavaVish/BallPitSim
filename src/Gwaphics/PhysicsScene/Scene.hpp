@@ -16,11 +16,11 @@ class Scene
 public:
 	double currTime;
 	double currStep;
-	double physicsStepTime = 1e-2;
+	double physicsStepTime = 3e-2;
 	double CRCoeff = 1.0;
 	double dragCoeff = 0.0;
-	double tolerance = 5e-4;
-	int maxIterations = 1e6;
+	double tolerance = 1e-3;
+	int maxIterations = 1e5;
 	bool isRunning = false;
 	Scene(Vulkan::CommandPool& commandPool);
 	~Scene();

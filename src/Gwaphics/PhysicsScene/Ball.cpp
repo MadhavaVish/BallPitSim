@@ -1,10 +1,5 @@
 #include "Ball.hpp"
 
-void Ball::resetDelta() {
-	dx = { 0, 0, 0 };
-	n = 0;
-}
-
 double Ball::invScaleMass() { 
 	double k = 1; 
 	return invMass * ( 1 / exp(-k * predictedP(1)) ); 
@@ -19,13 +14,11 @@ void Ball::integrate(double timeStep, const double dragCoeff) {
 
 bool Ball::isCollide(const Ball& b, double& depth, RowVector3d& contactNormal, RowVector3d& penPosition) {
 	
-	if (isFixed && b.isFixed)  return false; //collision does nothing
+	if ((isFixed && b.isFixed) || (meshId == b.meshId))  return false; //collision does nothing
 		
-	double r = ( meshId == b.meshId? insideRadius : radius ); //collision is respecting a smaller radius in order to lower collision detection within same mesh
-	
 	if (type == BallType::RigidBody && b.type == BallType::RigidBody) {
 		RowVector3d collisionVec = b.predictedP - predictedP;
-		if (collisionVec.norm() > 2 * r) return false;
+		if (collisionVec.norm() > 2 * radius) return false;
 		
 		if (isFixed || normal.norm() > b.normal.norm())
 			contactNormal = normal;
@@ -35,8 +28,8 @@ bool Ball::isCollide(const Ball& b, double& depth, RowVector3d& contactNormal, R
 
 		contactNormal *= contactNormal.dot(collisionVec);
 
-		depth = 2 * r - collisionVec.norm();
-		penPosition = predictedP + collisionVec * (r - depth);
+		depth = 2 * radius - collisionVec.norm();
+		penPosition = predictedP + collisionVec * (radius - depth);
 
 		return true;
 	}
@@ -65,4 +58,16 @@ void Ball::updatePosition(double timeStep) {
 		return;  // Not moving fixed object
 
 	predictedP << predictedP + velocity * timeStep;
+}
+
+void Ball::resolve(double timeStep) {
+	if (n != 0) {
+		predictedP += dx / n;
+		pos += dx / n;
+		velocity += (dv / n) +  ((predictedP - pos)/timeStep);
+	}
+
+	dx = RowVector3d::Zero();
+	dv = RowVector3d::Zero();
+	n = 0;
 }

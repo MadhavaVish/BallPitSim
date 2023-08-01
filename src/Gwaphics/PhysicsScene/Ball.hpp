@@ -26,6 +26,7 @@ public:
 	bool isFixed;  //is the object immobile
 	double invMass;
 	RowVector3d dx;
+	RowVector3d dv;
 	int n;
 	
 	
@@ -39,13 +40,16 @@ public:
 		isFixed = _isFixed;
 		meshId = _meshId;
 		velocity.setZero();
+		dx = RowVector3d::Zero();
+		dv = RowVector3d::Zero();
+		n = 0;
 	}
 	~Ball() {}
 
 	double invScaleMass();
 	bool isCollide(const Ball& b, double& depth, RowVector3d& intNormal, RowVector3d& intPosition);
 	void integrate(double timeStep, const double dragCoeff);
-	void resetDelta();
+	void resolve(double timeStep);
 	void updatePosition(double timeStep);
 	void updateVelocity(double timeStep, const double dragCoeff);
 };

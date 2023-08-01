@@ -38,14 +38,14 @@ bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, co
     v << v1, v2;
     if (constraintType == COLLISION) {
         if (abs(j.dot(v)) <= tolerance) {
-            correctedBallVelocities = currBallVelocities;
+            correctedBallVelocities = MatrixXd::Zero(2, 3);
             return true;
         }
     }
     else if (constraintType == DISTANCE) {
         double dist = (b1 - b2).stableNorm();
         if ((dist - refValue) <  refValue) {
-            correctedBallVelocities = currBallVelocities;
+            correctedBallVelocities = MatrixXd::Zero(2, 3);
             return true;
         }
     }
@@ -66,11 +66,8 @@ bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, co
     RowVector3d deltaV2; deltaV2 << deltaV(3), deltaV(4), deltaV(5);
 
     correctedBallVelocities = MatrixXd::Zero(2, 3);
-    correctedBallVelocities << (v1 + deltaV1), (v2 + deltaV2);
+    correctedBallVelocities << deltaV1, deltaV2;
 
-    //Debug purpose
-    RowVector3d v1corr = correctedBallVelocities.row(0);
-    RowVector3d v2corr = correctedBallVelocities.row(1);
 
     return false;
 }
@@ -96,9 +93,6 @@ bool Constraint::resolvePositionConstraint(const MatrixXd& currBallPositions, co
     for (int i = 3; i < 6; i++) {
         invMassMatrix(i, i) = this->invMass2;
     }
-
-    RowVector3d com1 = currBallPositions.row(0);
-    RowVector3d com2 = currBallPositions.row(1);
 
     RowVector3d r1 = currConstPositions.row(0);
     RowVector3d r2 = currConstPositions.row(1);
@@ -140,7 +134,7 @@ bool Constraint::resolvePositionConstraint(const MatrixXd& currBallPositions, co
 
     correctedBallPositions = MatrixXd::Zero(2, 3);
     // (Heuristic) Push back in the middle of the tolerance space along this axis 
-    correctedBallPositions << (com1 + deltaR1 * (1 - tolerance/2)), (com2 + deltaR2 * (1 - tolerance/2));
+    correctedBallPositions << (deltaR1 * (1 - tolerance/2)), (deltaR2 * (1 - tolerance/2));
     return false;
 }
 
