@@ -4,7 +4,7 @@
 //The velocities are a vector (vCOM1, w1, vCOM2, w2) in both input and output.
 //returns true if constraint was already valid with "currVelocities", and false otherwise (false means there was a correction done)
 //currCOMPositions is a 2x3 matrix, where each row is per one of the sides of the constraints; the rest of the relevant variables are similar, and so should the outputs be resized.
-bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, const MatrixXd& currConstPositions, const MatrixXd& currBallVelocities, MatrixXd& correctedCOMVelocities, double tolerance) {
+bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, const MatrixXd& currConstPositions, const MatrixXd& currBallVelocities, MatrixXd& correctedBallVelocities, double tolerance) {
 
     /**************
     1. If the velocity Constraint is satisfied up to tolerate ("abs(Jv)<=tolerance"), set corrected values to original ones and return true
@@ -38,18 +38,17 @@ bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, co
     v << v1, v2;
     if (constraintType == COLLISION) {
         if (abs(j.dot(v)) <= tolerance) {
-            correctedCOMVelocities = currBallVelocities;
+            correctedBallVelocities = currBallVelocities;
             return true;
         }
     }
     else if (constraintType == DISTANCE) {
         double dist = (b1 - b2).stableNorm();
         if ((dist - refValue) <  refValue) {
-            correctedCOMVelocities = currBallVelocities;
+            correctedBallVelocities = currBallVelocities;
             return true;
         }
     }
-
 
     double num = (j * v.transpose())(0, 0);
     double denom = (j * invMassMatrix * j.transpose())(0, 0);
@@ -66,8 +65,13 @@ bool Constraint::resolveVelocityConstraint(const MatrixXd& currBallPositions, co
     RowVector3d deltaV1; deltaV1 << deltaV(0), deltaV(1), deltaV(2);
     RowVector3d deltaV2; deltaV2 << deltaV(3), deltaV(4), deltaV(5);
 
-    correctedCOMVelocities = MatrixXd::Zero(2, 3);
-    correctedCOMVelocities << (v1 + deltaV1), (v2 + deltaV2);
+    correctedBallVelocities = MatrixXd::Zero(2, 3);
+    correctedBallVelocities << (v1 + deltaV1), (v2 + deltaV2);
+
+    //Debug purpose
+    RowVector3d v1corr = correctedBallVelocities.row(0);
+    RowVector3d v2corr = correctedBallVelocities.row(1);
+
     return false;
 }
 

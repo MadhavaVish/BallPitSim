@@ -8,7 +8,7 @@ Scene::Scene(Vulkan::CommandPool& commandPool)
 	Model model("assets/sphere.obj", vertices, indices);
 	std::cout << (vertices.size()) << std::endl;
 	addBunny();
-	addPool();
+	addFloor();
 	numParticles = this->balls.size();
 	currTime = 0;
 	currStep = 0;
@@ -19,7 +19,7 @@ Scene::Scene(Vulkan::CommandPool& commandPool)
 	for (uint32_t i = 0; i < numParticles; ++i)
 	{
 		Ball currBall = this->balls[i];
-		positions.push_back(glm::vec4(glm::vec3(currBall.currPos[0], -currBall.currPos[1], currBall.currPos[2]), 0.f));
+		positions.push_back(glm::vec4(glm::vec3(currBall.predictedP[0], -currBall.predictedP[1], currBall.predictedP[2]), 0.f));
 		velocities.push_back(glm::vec4(0.f, 0.f, 0.f, 0.f));
 	}
 	//for (auto position : positions)
@@ -47,7 +47,7 @@ Scene::~Scene()
 void Scene::updatePositions(double deltaTime)
 {
 	currTime += deltaTime;
-	if (currTime > 3)
+	if (currTime > 1)
 		isRunning = true;
 	
 	if (isRunning)
@@ -57,33 +57,30 @@ void Scene::updatePositions(double deltaTime)
 		updateScene(physicsStepTime, CRCoeff, dragCoeff, tolerance, maxIterations);
 		currStep = 0;
 	}
-
-	for (size_t i = 0; i < positions.size(); ++i)
-	{
-		positions[i] += velocities[i] * (float)deltaTime;
-	}
 }
 
 void Scene::updateBuffer(Vulkan::CommandPool& commandPool)
 {
 	Vulkan::BufferUtil::CopyFromStagingBuffer(commandPool, *positionBuffer_, positions);
 }
-void Scene::handleCollision(Mesh& m1, Mesh& m2, int b1, int b2, const double& depth, const RowVector3d& contactNormal, const RowVector3d& penPosition, const double CRCoeff, const double tolerance){
-	/***************
-	 TODO: practical 2
-	 update m(1,2) comVelocity, angVelocity and COM variables by using a Constraint class of type COLLISION
-	 ***********************/
-	Ball& ball1 = balls[b1];
-	Ball& ball2 = balls[b2];
-	Constraint currConstraint = Constraint(COLLISION, INEQUALITY, 0, 0, ball1.invMass, ball2.invMass, contactNormal, depth, CRCoeff);
 
-	Matrix<double,2,3> currBallPositions; currBallPositions << ball1.currPos, ball2.currPos;
-	Matrix<double, 2, 3> currConstPositions; currConstPositions << penPosition + depth * contactNormal, penPosition;
+void Scene::handleCollision(Constraint c) {
+	/*
+		Update m(1,2) comVelocity, angVelocity and COM variables by using a Constraint class of type COLLISION
+	*/
+	Ball& ball1 = balls[c.b1];
+	Ball& ball2 = balls[c.b2];
+	RowVector3d penPosition = ball1.predictedP + c.refVector.normalized() * ball1.radius;
+
+	Matrix<double,2,3> currBallPositions; currBallPositions << ball1.predictedP, ball2.predictedP;
+	Matrix<double, 2, 3> currConstPositions; currConstPositions << penPosition + c.refValue * c.refVector, penPosition;
 	Matrix<double, 2, 3> currBallVelocities; currBallVelocities << ball1.velocity, ball2.velocity;
 
 	MatrixXd correctedBallVelocities, correctedBallPositions;
 
-	bool velocityWasValid = currConstraint.resolveVelocityConstraint(currBallPositions, currConstPositions, currBallVelocities, correctedBallVelocities, tolerance);
+	// TODO : Suggested method store lastPos and currPos and update velocity according to the difference between those and not updateVel here
+
+	bool velocityWasValid = c.resolveVelocityConstraint(currBallPositions, currConstPositions, currBallVelocities, correctedBallVelocities, tolerance);
 
 	if (!velocityWasValid) {
 
@@ -92,11 +89,11 @@ void Scene::handleCollision(Mesh& m1, Mesh& m2, int b1, int b2, const double& de
 
 	}
 
-	bool positionWasValid = currConstraint.resolvePositionConstraint(currBallPositions, currConstPositions, correctedBallPositions, tolerance);
+	bool positionWasValid = c.resolvePositionConstraint(currBallPositions, currConstPositions, correctedBallPositions, tolerance);
 
 	if (!positionWasValid) {
-		ball1.currPos = correctedBallPositions.row(0);
-		ball2.currPos = correctedBallPositions.row(1);
+		ball1.predictedP = correctedBallPositions.row(0);
+		ball2.predictedP = correctedBallPositions.row(1);
 	}
 
 }
@@ -110,28 +107,36 @@ void Scene::handleCollision(Mesh& m1, Mesh& m2, int b1, int b2, const double& de
 	 You do not need to update this function in Practical 2
 	 *********************************************************************/
 void Scene::updateScene(const double timeStep, const double CRCoeff, const double dragCoeff, const double tolerance, const int maxIterations) {
-
+	vector<Constraint> contactConstraints;
 	//integrating velocity, position and orientation from forces and previous states
 	for (int i = 0; i < balls.size(); i++) {
+		balls[i].resetDelta();
 		balls[i].integrate(timeStep, dragCoeff);
 	}
 		
-	//detecting and handling collisions when found
-	//This is done exhaustively: checking every two objects in the scene.
+	// Detecting and handling collisions when found
+	// This is done exhaustively: checking every two objects in the scene.
+	// TODO (5) : Spatial partitionning
 	double depth;
 	RowVector3d contactNormal, penPosition;
 	for (int i = 0; i < meshes.size(); i++) {
 		for (int j = i + 1; j < meshes.size(); j++) {
-			for (int k = meshes[i].globalOffset; k < meshes[i].globalOffset + meshes[i].length; k++) {
-				for (int l = meshes[j].globalOffset; l < meshes[j].globalOffset + meshes[j].length; l++) {
+			for (int k = meshes[i].globalOffset; k < meshes[i].globalOffset + meshes[i].length; k++) {		// TODO (5) : For all Balls
+				for (int l = meshes[j].globalOffset; l < meshes[j].globalOffset + meshes[j].length; l++) {	// TODO (5) : Spatial partitionning => Find Neighboring function
 					if (balls[k].isCollide(balls[l], depth, contactNormal, penPosition)) {
-						handleCollision(meshes[i], meshes[j], k, l, depth, contactNormal, penPosition, CRCoeff, tolerance);
+						//TODO (4) : APPLY MASS SCALING
+						contactConstraints.push_back(Constraint(COLLISION, INEQUALITY, k, l, balls[k].invMass, balls[l].invMass, contactNormal, depth, CRCoeff));
 						break;
 					}
 				}
 			}
 		}
 	}
+
+	for (int i = 0; i < contactConstraints.size(); i++) {
+		handleCollision(contactConstraints[i]); // meshes[i], meshes[j], k, l, depth, contactNormal, penPosition, CRCoeff, tolerance);
+	}
+	contactConstraints.clear();
 
 	//Resolving user constraints iteratively until either:
 	//1. Positions or velocities are valid up to tolerance (a full streak of validity in the iteration)
@@ -145,24 +150,24 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 
 		Constraint currConstraint = constraints[currConstIndex];
 
-		RowVector3d currConstPos1 = balls[currConstraint.b1].currPos;
-		RowVector3d currConstPos2 = balls[currConstraint.b2].currPos;
+		RowVector3d currConstPos1 = balls[currConstraint.b1].predictedP;
+		RowVector3d currConstPos2 = balls[currConstraint.b2].predictedP;
 
-		MatrixXd currCOMPositions(2, 3); currCOMPositions << currConstPos1, currConstPos2;
+		MatrixXd currBallPositions(2, 3); currBallPositions << currConstPos1, currConstPos2;
 		MatrixXd currConstPositions(2, 3); currConstPositions << currConstPos1, currConstPos2;
-		MatrixXd currCOMVelocities(2, 3); currCOMVelocities << balls[currConstraint.b1].velocity, balls[currConstraint.b2].velocity;
+		MatrixXd currBallVelocities(2, 3); currBallVelocities << balls[currConstraint.b1].velocity, balls[currConstraint.b2].velocity;
 
-		MatrixXd correctedCOMVelocities, correctedCOMPositions;
+		MatrixXd correctedBallVelocities, correctedBallPositions;
 
-		bool velocityWasValid = currConstraint.resolveVelocityConstraint(currCOMPositions, currConstPositions, currCOMVelocities, correctedCOMVelocities, tolerance);
+		bool velocityWasValid = currConstraint.resolveVelocityConstraint(currBallPositions, currConstPositions, currBallVelocities, correctedBallVelocities, tolerance);
 
 		if (velocityWasValid) {
 			zeroStreak++;
 		}
 		else {
 			zeroStreak = 0;
-			balls[currConstraint.b1].velocity = correctedCOMVelocities.row(0);
-			balls[currConstraint.b2].velocity = correctedCOMVelocities.row(1);
+			balls[currConstraint.b1].velocity = correctedBallVelocities.row(0);
+			balls[currConstraint.b2].velocity = correctedBallVelocities.row(1);
 
 		}
 
@@ -172,7 +177,7 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 
 	for (int i = 0; i < balls.size(); i++) {
 		velocities[i] = glm::vec4(balls[i].velocity[0], -balls[i].velocity[1], balls[i].velocity[2], 0.0f);
-		positions[i] = glm::vec4(balls[i].currPos[0], -balls[i].currPos[1], balls[i].currPos[2], 0.0f);
+		positions[i] = glm::vec4(balls[i].predictedP[0], -balls[i].predictedP[1], balls[i].predictedP[2], 0.0f);
 	}
 
 	if (currIteration * constraints.size() >= maxIterations)
@@ -187,15 +192,15 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 		Constraint currConstraint = constraints[currConstIndex];
 
 
-		RowVector3d currConstPos1 = balls[currConstraint.b1].currPos;
-		RowVector3d currConstPos2 = balls[currConstraint.b2].currPos;
+		RowVector3d currConstPos1 = balls[currConstraint.b1].predictedP;
+		RowVector3d currConstPos2 = balls[currConstraint.b2].predictedP;
 
 		MatrixXd currCOMPositions(2, 3); currCOMPositions << currConstPos1, currConstPos2;
 		MatrixXd currConstPositions(2, 3); currConstPositions << currConstPos1, currConstPos2;
 
-		MatrixXd correctedCOMPositions;
+		MatrixXd correctedBallPositions;
 
-		bool positionWasValid = currConstraint.resolvePositionConstraint(currCOMPositions, currConstPositions, correctedCOMPositions, tolerance);
+		bool positionWasValid = currConstraint.resolvePositionConstraint(currCOMPositions, currConstPositions, correctedBallPositions, tolerance);
 
 		if (positionWasValid) {
 			zeroStreak++;
@@ -204,8 +209,8 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 			//only update the COM and angular velocity, don't both updating all currV because it might change again during this loop!
 			zeroStreak = 0;
 
-			balls[currConstraint.b1].currPos = correctedCOMPositions.row(0);
-			balls[currConstraint.b2].currPos = correctedCOMPositions.row(1);
+			balls[currConstraint.b1].predictedP = correctedBallPositions.row(0);
+			balls[currConstraint.b2].predictedP = correctedBallPositions.row(1);
 
 		}
 
@@ -216,9 +221,19 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 	if (currIteration * constraints.size() >= maxIterations)
 		cout << "Position Constraint resolution reached maxIterations without resolving!" << endl;
 
+	//TODO (6) Sleeping
+	/*
+		for all particles i do
+		update velocity vi <= 1 / dt * (xi_new - xi)
+		advect diffuse particles
+		apply internal forces fdrag, fvort
+		update positions xi <= xi_new or apply sleeping
+		end for
+	 */
+
 	for (int i = 0; i < balls.size(); i++) {
 		velocities[i] = glm::vec4(balls[i].velocity[0], -balls[i].velocity[1], balls[i].velocity[2], 0.0f);
-		positions[i] = glm::vec4(balls[i].currPos[0], -balls[i].currPos[1], balls[i].currPos[2], 0.0f);
+		positions[i] = glm::vec4(balls[i].predictedP[0], -balls[i].predictedP[1], balls[i].predictedP[2], 0.0f);
 	}
 }
 
@@ -228,13 +243,13 @@ void Scene::addBunny() {
 	meshes.push_back(Mesh(initialBallNb, balls.balls.size()));
 	RowVector3d translation = Vector3d(0.75,2,0.75);
 	for (int i = 0; i < balls.balls.size(); i++) {
-		this->balls.push_back(Ball(0, balls.balls.size() / 100.0, false, (balls.balls[i]/10)+ translation, balls.normals[i]));
+		this->balls.push_back(Ball(BallType::RigidBody, 0, balls.balls.size() / 100.0, false, (balls.balls[i]/10)+ translation, balls.normals[i]));
 		this->ballsColor.push_back(glm::vec4(0.93, 0.85, 0.33,1.0));
 	}
 
 	for (int i = 0; i < balls.constraints.size(); i++) {
-		double initDist = (this->balls[balls.constraints[i][0]].origPos - this->balls[balls.constraints[i][1]].origPos).norm();
-		this->constraints.push_back(Constraint(DISTANCE, EQUALITY, initialBallNb + balls.constraints[i][0], initialBallNb + balls.constraints[i][1], balls.balls.size() / 100.0, balls.balls.size() / 100.0, (this->balls[initialBallNb + balls.constraints[i][1]].currPos - this->balls[initialBallNb + balls.constraints[i][0]].currPos).normalized(), initDist, 0.0));
+		double initDist = (this->balls[balls.constraints[i][0]].pos - this->balls[balls.constraints[i][1]].pos).norm();
+		this->constraints.push_back(Constraint(DISTANCE, EQUALITY, initialBallNb + balls.constraints[i][0], initialBallNb + balls.constraints[i][1], balls.balls.size() / 100.0, balls.balls.size() / 100.0, (this->balls[initialBallNb + balls.constraints[i][1]].predictedP - this->balls[initialBallNb + balls.constraints[i][0]].predictedP).normalized(), initDist, 0.0));
 	}
 }
 
@@ -244,7 +259,18 @@ void Scene::addPool() {
 	meshes.push_back(Mesh(initialBallNb, balls.balls.size()));
 	RowVector3d translation = Vector3d(0, 0, 0);
 	for (int i = 0; i < balls.balls.size(); i++) {
-		this->balls.push_back(Ball(1, 0, true, (balls.balls[i] / 10) + translation, balls.normals[i]));
+		this->balls.push_back(Ball(BallType::RigidBody, 1, 0, true, (balls.balls[i] / 10) + translation, balls.normals[i]));
+		this->ballsColor.push_back(glm::vec4(0.93, 0.33, 0.33, 1.0));
+	}
+}
+
+void Scene::addFloor() {
+	BallLoader balls("assets/floor.ball");
+	int initialBallNb = this->balls.size();
+	meshes.push_back(Mesh(initialBallNb, balls.balls.size()));
+	RowVector3d translation = Vector3d(0, 0, 0);
+	for (int i = 0; i < balls.balls.size(); i++) {
+		this->balls.push_back(Ball(BallType::RigidBody, 1, 0, true, (balls.balls[i] / 10) + translation, balls.normals[i]));
 		this->ballsColor.push_back(glm::vec4(0.93, 0.33, 0.33, 1.0));
 	}
 }

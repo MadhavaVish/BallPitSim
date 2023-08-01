@@ -9,23 +9,32 @@
 using namespace Eigen;
 using namespace std;
 
+typedef enum BallType { RigidBody, Water, Smoke };
+
 class Ball {
 public:
-	const double radius = 0.05;
-	const double insideRadius = 0.04;
-	RowVector3d origPos;   //original ball positions
-	RowVector3d currPos;   //current ball position
+	const double radius = 5e-2;
+	const double insideRadius = 4e-2;
+	RowVector3d pos;
+	RowVector3d predictedP;
 	RowVector3d velocity;
+	BallType type;
 	RowVector3d normal;
+	int meshId;
 
 	//kinematics
 	bool isFixed;  //is the object immobile
 	double invMass;
+	RowVector3d dx;
+	int n;
+	
+	
 
-	Ball(const int _meshId, const double _invMass, const bool _isFixed, const RowVector3d& _Pos, const RowVector3d& _Norm) {
+	Ball(const BallType _type, const int _meshId, const double _invMass, const bool _isFixed, const RowVector3d& _Pos, const RowVector3d& _Norm) {
+		type = _type;
 		invMass = _invMass;
-		origPos = _Pos;
-		currPos = _Pos;
+		pos = _Pos;
+		predictedP = _Pos;
 		normal = _Norm;
 		isFixed = _isFixed;
 		meshId = _meshId;
@@ -33,11 +42,12 @@ public:
 	}
 	~Ball() {}
 
+	double invScaleMass();
 	bool isCollide(const Ball& b, double& depth, RowVector3d& intNormal, RowVector3d& intPosition);
 	void integrate(double timeStep, const double dragCoeff);
+	void resetDelta();
 	void updatePosition(double timeStep);
 	void updateVelocity(double timeStep, const double dragCoeff);
-	int meshId;
 };
 
 class Mesh {

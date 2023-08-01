@@ -16,10 +16,10 @@ class Scene
 public:
 	double currTime;
 	double currStep;
-	double physicsStepTime = 0.25;
+	double physicsStepTime = 1e-2;
 	double CRCoeff = 1.0;
 	double dragCoeff = 0.0;
-	double tolerance = 1e-3;
+	double tolerance = 5e-4;
 	int maxIterations = 1e6;
 	bool isRunning = false;
 	Scene(Vulkan::CommandPool& commandPool);
@@ -34,9 +34,10 @@ public:
 	void updatePositions(double deltaTime);
 	void updateBuffer(Vulkan::CommandPool& commandPool);
 	
-	void handleCollision(Mesh& m1, Mesh& m2, int b1, int b2, const double& depth, const RowVector3d& contactNormal, const RowVector3d& penPosition, const double CRCoeff, const double tolerance);
+	void handleCollision(Constraint c); // int b1, int b2, const double& depth, const RowVector3d& contactNormal, const RowVector3d& penPosition, const double CRCoeff, const double tolerance);
 	void addBunny();
 	void addPool();
+	void addFloor();
 	void updateScene(const double timeStep, const double CRCoeff, const double dragCoeff, const double tolerance, const int maxIterations);
 
 private:
