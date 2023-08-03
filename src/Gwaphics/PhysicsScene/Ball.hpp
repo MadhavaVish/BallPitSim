@@ -23,7 +23,8 @@ public:
 	int meshId;
 
 	//kinematics
-	bool isFixed;  //is the object immobile
+	bool isFixed;		//is the object immobile
+	bool contact;
 	double invMass;
 	RowVector3d dx;
 	RowVector3d dv;
@@ -43,16 +44,18 @@ public:
 		dx = RowVector3d::Zero();
 		dv = RowVector3d::Zero();
 		n = 0;
+		contact = false;
 	}
 	~Ball() {}
 
 	double invScaleMass();
 	bool isCollide(const Ball& b, double& depth, RowVector3d& intNormal, RowVector3d& intPosition);
 	void integrate(double timeStep, const double dragCoeff);
+	void resolveContact(double timeStep);
 	void resolve(double timeStep);
-	void resolvePredicted(double timeStep);
 	void updatePosition(double timeStep);
 	void updateVelocity(double timeStep, const double dragCoeff);
+	void dampVelocity();
 };
 
 class Mesh {

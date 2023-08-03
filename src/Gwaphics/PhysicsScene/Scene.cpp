@@ -9,6 +9,7 @@ Scene::Scene(Vulkan::CommandPool& commandPool)
 	std::cout << (vertices.size()) << std::endl;
 	addBunny();
 	addFloor();
+	//addCalibCube();
 	numParticles = this->balls.size();
 	currTime = 0;
 	currStep = 0;
@@ -125,8 +126,7 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 			for (int k = meshes[i].globalOffset; k < meshes[i].globalOffset + meshes[i].length; k++) {		// TODO (5) : For all Balls
 				for (int l = meshes[j].globalOffset; l < meshes[j].globalOffset + meshes[j].length; l++) {	// TODO (5) : Spatial partitionning => Find Neighboring function
 					if (balls[k].isCollide(balls[l], depth, contactNormal, penPosition)) {
-						//TODO : WHEN GOT A WORKING 1.0 version use SCALED MASS here
-						contactConstraints.push_back(Constraint(COLLISION, INEQUALITY, k, l, balls[k].invMass, balls[l].invMass, contactNormal, depth, CRCoeff));
+						contactConstraints.push_back(Constraint(COLLISION, INEQUALITY, k, l, balls[k].invScaleMass(), balls[l].invScaleMass(), contactNormal, depth, CRCoeff));
 						break;
 					}
 				}
@@ -145,8 +145,8 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 		}
 		for (int i = 0; i < contactConstraints.size(); i++) {
 			Constraint currConst = contactConstraints[i];
-			balls[currConst.b1].resolve(timeStep);
-			balls[currConst.b2].resolve(timeStep);
+			balls[currConst.b1].resolveContact(timeStep);
+			balls[currConst.b2].resolveContact(timeStep);
 			if (!balls[currConst.b1].isCollide(balls[currConst.b2], depth, contactNormal, penPosition)) zeroStreak++;
 		}
 		currIteration++;
@@ -201,8 +201,8 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 
 		for (int i = 0; i < constraints.size(); i++) {
 			Constraint currConst = constraints[i];
-			balls[currConst.b1].resolvePredicted(timeStep);
-			balls[currConst.b2].resolvePredicted(timeStep);
+			balls[currConst.b1].resolve(timeStep);
+			balls[currConst.b2].resolve(timeStep);
 		}
 
 		currIteration++;
@@ -210,14 +210,14 @@ void Scene::updateScene(const double timeStep, const double CRCoeff, const doubl
 
 	}
 	if (currIteration * constraints.size() >= maxIterations)
-		cout << "Constraint solving reached maxIterations !" << endl;
+		cout << "Constraint solving reached maxIterations !" << endl; 
 
 	for (int i = 0; i < balls.size(); i++) {
 	/*	update velocity vi <= 1 / dt * (xi_new - xi)
 		advect diffuse particles
 		apply internal forces fdrag, fvort */
-		balls[i].velocity = balls[i].velocity * 0.99;
-		if (balls[i].velocity.norm() < tolerance) balls[i].velocity = RowVector3d::Zero() ; else balls[i].pos = balls[i].predictedP;
+		balls[i].dampVelocity();
+		if ((balls[i].predictedP - balls[i].pos).norm() < 1e-4) balls[i].pos = balls[i].pos; else balls[i].pos = balls[i].predictedP;
 		velocities[i] = glm::vec4(balls[i].velocity[0], -balls[i].velocity[1], balls[i].velocity[2], 0.0f);
 		positions[i] = glm::vec4(balls[i].predictedP[0], -balls[i].predictedP[1], balls[i].predictedP[2], 0.0f);
 	}
@@ -257,6 +257,17 @@ void Scene::addFloor() {
 	RowVector3d translation = Vector3d(0, 0, 0);
 	for (int i = 0; i < balls.balls.size(); i++) {
 		this->balls.push_back(Ball(BallType::RigidBody, 1, 0, true, (balls.balls[i] / 10) + translation, balls.normals[i]));
+		this->ballsColor.push_back(glm::vec4(0.93, 0.33, 0.33, 1.0));
+	}
+}
+
+void Scene::addCalibCube() {
+	BallLoader balls("assets/calibCube.ball");
+	int initialBallNb = this->balls.size();
+	meshes.push_back(Mesh(initialBallNb, balls.balls.size()));
+	RowVector3d translation = Vector3d(0, 0, 0);
+	for (int i = 0; i < balls.balls.size(); i++) {
+		this->balls.push_back(Ball(BallType::RigidBody, 1, 0, true, (balls.balls[i] / 10) + translation, RowVector3d::Zero() ));
 		this->ballsColor.push_back(glm::vec4(0.93, 0.33, 0.33, 1.0));
 	}
 }

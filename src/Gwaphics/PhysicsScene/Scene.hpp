@@ -38,6 +38,7 @@ public:
 	void addBunny();
 	void addPool();
 	void addFloor();
+	void addCalibCube();
 	void updateScene(const double timeStep, const double CRCoeff, const double dragCoeff, const double tolerance, const int maxIterations);
 
 private:

@@ -60,11 +60,24 @@ void Ball::updatePosition(double timeStep) {
 	predictedP << predictedP + velocity * timeStep;
 }
 
-void Ball::resolve(double timeStep) {
+void Ball::resolveContact(double timeStep) {
 	if (n != 0) {
 		predictedP += dx / n;
 		pos += dx / n;
-		velocity += (dv / n);// +((predictedP - pos) / timeStep);
+		velocity += (dv / n);
+	}
+
+	contact = true;
+
+	dx = RowVector3d::Zero();
+	dv = RowVector3d::Zero();
+	n = 0;
+}
+
+void Ball::resolve(double timeStep) {
+	if (n != 0) {
+		predictedP += dx / n;
+		if(!contact) velocity = ((predictedP - pos) / timeStep);
 	}
 
 	dx = RowVector3d::Zero();
@@ -72,13 +85,6 @@ void Ball::resolve(double timeStep) {
 	n = 0;
 }
 
-void Ball::resolvePredicted(double timeStep) {
-	if (n != 0) {
-		predictedP += dx / n;
-		velocity += (dv / n);// +((predictedP - pos) / timeStep);
-	}
-
-	dx = RowVector3d::Zero();
-	dv = RowVector3d::Zero();
-	n = 0;
+void Ball::dampVelocity() {
+	
 }
